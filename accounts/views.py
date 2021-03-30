@@ -49,7 +49,7 @@ def register_user(request):
             success = True
             form.save()
 
-            # return redirect("/login/")
+            return redirect("/login/")
 
         else:
             msg = 'Form is not valid'
