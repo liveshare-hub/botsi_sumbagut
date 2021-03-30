@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 import dj_database_url
 from pathlib import Path
+import environ
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,17 +28,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'k5m*)f16ifhok^%i4_79#p)gr#ar5@x%c*^w$0b(#)q%--_p_l'
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu)5%asj6yjpkag')
+SECRET_KEY = env('DJANGO_SECRET_KEY',
+                 default='cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu)5%asj6yjpkag')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+DEBUG = env('DJANGO_DEBUG', default=True)
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'pii-project-rencana-kerja.herokuapp.com',
+    env('ALLOWED_HOSTS'),
 ]
 
 
@@ -99,10 +104,10 @@ WSGI_APPLICATION = 'rencana_kerja.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USERNAME'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USERNAME'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST', default='localhost'),
     }
 }
 
