@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"> 
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+   <div class="col-lg-12">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{ form_title }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ form_title }}</h6>
+      </div>
+      <form id="." action="#" method="post" enctype="multipart/form-data" novalidate="novalidate">
+        <div class="card-body">
+          {% csrf_token %}
+          {{ form.as_p }}
+        </div>
+        <div class="card-footer">
+          <div class="row m-0">
+            <div class="col-md-12 mb-0'" align="right">
+              <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+              <a href="{% url 'entry:entry_list' %}" class="btn btn-primary btn-sm" role="button">Batal</a>
+            </div>
+          </div>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+<script>
+$(document).ready(function() {
+    $('.datepicker').datepicker();
+});
+</script>
+{% endblock javascripts %}
