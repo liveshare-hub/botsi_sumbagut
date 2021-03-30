@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 import dj_database_url
 from pathlib import Path
 
@@ -21,10 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'k5m*)f16ifhok^%i4_79#p)gr#ar5@x%c*^w$0b(#)q%--_p_l'
+# SECRET_KEY = 'k5m*)f16ifhok^%i4_79#p)gr#ar5@x%c*^w$0b(#)q%--_p_l'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY', 'cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu)5%asj6yjpkag')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 ALLOWED_HOSTS = [
     'localhost',
