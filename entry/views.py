@@ -2,23 +2,24 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from .models import BuatRencana
-from accounts.models import Bidang, UserAccount
+# from accounts.models import Bidang, UserAccount
 from .forms import BuatRencanaForm
 
 
 # Entry
 @login_required(login_url="/login/")
 def entry_list(request):
-    is_staff = request.user.is_staff
-    is_kabid = request.user.is_kabid
-    bidang = request.user.bidang
-    if is_staff:
-        entry_list = BuatRencana.objects.all()
-    else:
-        if is_kabid:
-            entry_list = BuatRencana.objects.filter(user__bidang=bidang)
-        else:
-            entry_list = BuatRencana.objects.filter(user=request.user)
+    # is_staff = request.user.is_staff
+    # is_kabid = request.user.is_kabid
+    # bidang = request.user.bidang
+    # if is_staff:
+    entry_list = BuatRencana.objects.select_related('user__profile__bidang')
+    # entry_list = BuatRencana.objects.all()
+    # else:
+    #     if is_kabid:
+    #         entry_list = BuatRencana.objects.filter(user__bidang=bidang)
+    #     else:
+    #         entry_list = BuatRencana.objects.filter(user=request.user)
 
     context = {
         'entry_list': entry_list,

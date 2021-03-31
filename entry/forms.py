@@ -3,7 +3,8 @@ from functools import partial
 
 from .models import BuatRencana
 
-DateInput = partial(forms.DateInput, {'class': 'datepicker'})
+DateInput = partial(
+    forms.DateInput, {'class': 'form-control', 'id': 'datepicker'})
 
 
 class BuatRencanaForm(forms.ModelForm):
@@ -18,7 +19,7 @@ class BuatRencanaForm(forms.ModelForm):
                 attrs={'class': 'form-control',
                        'placeholder': 'Masukkan masukkan judul',
                        'autofocus': True}),
-            'isi': forms.TextInput(
+            'isi': forms.Textarea(
                 attrs={'class': 'form-control',
                        'placeholder': 'Masukkan keterangan'}),
         }

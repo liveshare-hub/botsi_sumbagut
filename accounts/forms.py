@@ -1,9 +1,8 @@
-from .models import Bidang
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-# from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
-User = get_user_model()
+from django.contrib.auth.models import User
+
+from .models import Bidang
 
 
 class LoginForm(forms.Form):
@@ -11,7 +10,8 @@ class LoginForm(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Username",
-                "class": "form-control"
+                "class": "form-control",
+                "autofocus": True
             }
         ))
     password = forms.CharField(
@@ -28,14 +28,8 @@ class SignUpForm(UserCreationForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Username",
-                "class": "form-control"
-            }
-        ))
-    name = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "Nama",
-                "class": "form-control"
+                "class": "form-control",
+                "autofocus": True
             }
         ))
     bidang = forms.ModelChoiceField(
@@ -45,13 +39,6 @@ class SignUpForm(UserCreationForm):
                 "class": "form-control"
             }
         ))
-    # email = forms.EmailField(
-    #     widget=forms.EmailInput(
-    #         attrs={
-    #             "placeholder": "Email",
-    #             "class": "form-control"
-    #         }
-    #     ))
     password1 = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
@@ -62,11 +49,11 @@ class SignUpForm(UserCreationForm):
     password2 = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "Password check",
+                "placeholder": "Masukkan ulang password",
                 "class": "form-control"
             }
         ))
 
     class Meta:
         model = User
-        fields = ('username', 'bidang', 'name', 'password1', 'password2')
+        fields = ('username', 'password1', 'password2')

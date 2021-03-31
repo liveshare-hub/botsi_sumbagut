@@ -55,8 +55,8 @@ INSTALLED_APPS = [
     # Eksternal
     'fontawesome-free',
     # Internal
-    'accounts',
-    'entry',
+    'accounts.apps.AccountsConfig',
+    'entry.apps.EntryConfig',
 ]
 
 MIDDLEWARE = [
@@ -125,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'id'
 
 TIME_ZONE = 'Asia/Jakarta'
 
@@ -148,7 +148,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_ROOT = BASE_DIR, 'static/images'
 MEDIA_URL = '/images/'
 
-AUTH_USER_MODEL = 'accounts.UserAccount'
+# AUTH_USER_MODEL = 'accounts.UserAccount'
 
 # Heroku: Update database configuration from $DATABASE_URL.
 # db_from_env = dj_database_url.config(conn_max_age=500)

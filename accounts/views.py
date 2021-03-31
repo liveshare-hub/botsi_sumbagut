@@ -1,64 +1,61 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import Group
+from django.contrib.auth import logout
+from django.contrib import messages
 
-from django.contrib.auth.models import User
-from django.forms.utils import ErrorList
-from django.http import HttpResponse
+from .models import Profile
 from .forms import LoginForm, SignUpForm
-from django.contrib.auth import logout as django_logout
 
 
-def login_view(request):
+def user_login(request):
     form = LoginForm(request.POST or None)
 
-    msg = None
-
     if request.method == "POST":
-
         if form.is_valid():
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
-            user = authenticate(username=username, password=password)
+            user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("/")
+                return redirect('dashboard')
             else:
-                msg = 'Username atau password salah'
+                messages.info(request, 'Username atau password salah')
         else:
-            msg = 'Error validating the form'
+            messages.info(request, 'Error validasi form')
 
-    return render(request, "accounts/login.html", {"form": form, "msg": msg})
+    context = {
+        "form": form
+    }
+    return render(request, "accounts/login.html", context)
 
 
-def register_user(request):
-
-    msg = None
-    success = False
+def user_register(request):
+    form = SignUpForm()
 
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
-            bidang = form.cleaned_data.get("bidang")
-            username = form.cleaned_data.get("username")
-            name = form.cleaned_data.get("name")
-            raw_password = form.cleaned_data.get("password1")
-            user = authenticate(
-                bidang=bidang, name=name, username=username, password=raw_password)
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            bidang = form.cleaned_data.get('bidang')
+            group = Group.objects.get(name='staff')
+            user.groups.add(group)
+            Profile.objects.create(
+                user=user,
+                nama=user.username,
+                bidang=bidang
+            )
 
-            msg = 'User created - please <a href="/login">Sign In</a>.'
-            success = True
-            form.save()
+            messages.success(request, 'Akun telah di buat ' + username)
+            return redirect("login")
 
-            return redirect("/login/")
-
-        else:
-            msg = 'Form is not valid'
-    else:
-        form = SignUpForm()
-
-    return render(request, "accounts/register.html", {"form": form, "msg": msg, "success": success})
+    context = {
+        "form": form,
+    }
+    return render(request, "accounts/register.html", context)
 
 
-def logout(request):
-    django_logout(request)
+def user_logout(request):
+    logout(request)
     return redirect("/login/")

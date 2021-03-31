@@ -1,43 +1,64 @@
-{% extends "base.html" %}
-
-{% block stylesheets %}
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"> 
-{% endblock stylesheets %}
-
-{% block content %}
-<div class="row">
-   <div class="col-lg-12">
-    <div class="card">
+{% extends "base.html" %} {% block stylesheets %}
+<link
+  rel="stylesheet"
+  href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+/>
+{% endblock stylesheets %} {% block content %}
+<br />
+<div class="card">
+  <h5 class="card-header">{{ form_title }}</h5>
+  <form
+    id="."
+    action="#"
+    method="post"
+    enctype="multipart/form-data"
+    novalidate="novalidate"
+  >
+    <div class="card-body">
       <div class="card-body">
-        <h5 class="card-title">{{ form_title }}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">{{ form_title }}</h6>
-      </div>
-      <form id="." action="#" method="post" enctype="multipart/form-data" novalidate="novalidate">
-        <div class="card-body">
-          {% csrf_token %}
-          {{ form.as_p }}
-        </div>
-        <div class="card-footer">
-          <div class="row m-0">
-            <div class="col-md-12 mb-0'" align="right">
-              <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
-              <a href="{% url 'entry:entry_list' %}" class="btn btn-primary btn-sm" role="button">Batal</a>
-            </div>
+        {% csrf_token %}
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="inputEmail4">Judul</label>
+            {{form.judul}}
+            <span class="text-error">{{ form.judul.errors }}</span>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="inputEmail4">Tanggal</label>
+            {{form.tgl_eksekusi}}
+            <span class="text-error">{{ form.tgl_eksekusi.errors }}</span>
           </div>
         </div>
-        </form>
+        <div class="row">
+          <div class="form-group col-md-12">
+            <label for="inputEmail4">Isi</label>
+            {{form.isi}}
+            <span class="text-error">{{ form.isi.errors }}</span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+    <div class="card-footer text-muted">
+      <div class="row m-0">
+        <div class="col-md-12 mb-0'" align="right">
+          <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+          <a
+            href="{% url 'entry:entry_list' %}"
+            class="btn btn-primary btn-sm"
+            role="button"
+            >Batal</a
+          >
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
-{% endblock content %}
-
-{% block javascripts %}
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+{% endblock content %} {% block javascripts %}
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script>
-$(document).ready(function() {
-    $('.datepicker').datepicker();
-});
+  $(function () {
+    $('#datepicker').datepicker();
+  });
 </script>
 {% endblock javascripts %}
