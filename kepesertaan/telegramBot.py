@@ -6,8 +6,6 @@ from accounts.models import ExtendUser
 
 from .decorators import cek_login
 
-global kd_token
-
 bot = telebot.TeleBot(settings.BOT_API, parse_mode='html')
 url = "http://localhost:8000/graphql"
 
@@ -124,7 +122,7 @@ def token(message):
     if len(texts) < 2:
         bot.send_message(message.chat.id, "Format Salah!")
     else:
-        kd_token = texts[1]
+        global kd_token = texts[1]
         query = """
 mutation{
   verifyToken(
