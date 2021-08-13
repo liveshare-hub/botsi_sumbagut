@@ -136,7 +136,8 @@ mutation{
         headers = {"Authorization":"JWT %s" % (kd_token)}
         post_json = requests.post(url, json={'query':query,'headers':headers})
         json_data = json.loads(post_json.text)
-        data = json_data['data']['verifyToken']['payload']
+        data = json_data['data']['verifyToken']
+        username = data['payload']['username']
         bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
 
 @bot.message_handler(commands=['me'])
