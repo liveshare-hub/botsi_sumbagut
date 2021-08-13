@@ -6,6 +6,8 @@ from accounts.models import ExtendUser
 
 from .decorators import cek_login
 
+global kd_token
+
 bot = telebot.TeleBot(settings.BOT_API, parse_mode='html')
 url = "http://localhost:8000/graphql"
 
@@ -137,7 +139,6 @@ mutation{
         post_json = requests.post(url, json={'query':query,'headers':headers})
         json_data = json.loads(post_json.text)
         data = json_data['data']['verifyToken']
-        print(data)
         # username = data['payload']['username']
         bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
 
@@ -156,8 +157,8 @@ query{
         json_data = json.loads(get_json.text)
         
         data = json_data['data']['me']
-        print(data)
-        if data == 'null':
+        print(data['username'])
+        if data is None:
             bot.send_message(message.chat.id, "Token anda sudah expired. Silahkan login kembali")
         else:
             pesan = """
