@@ -152,7 +152,15 @@ query{
   }
 }
         """
-        headers = {"Authorization":"JWT %s","Content-Type":"application/json","User-Agent":"PostmanRuntime/7.28.3" % (kd_token)}
+        headers = {
+        'Authorization':'JWT %s' % (kd_token),
+        'Connection': 'keep-alive',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
         get_json = requests.get(url, json={'query':query,'headers':headers})
         print(get_json.text)
         json_data = json.loads(get_json.text)
