@@ -154,10 +154,10 @@ query{
         """
         headers = {"Authorization":"JWT %s" % (kd_token)}
         get_json = requests.get(url, json={'query':query,'headers':headers})
+        print(get_json.text)
         json_data = json.loads(get_json.text)
         
         data = json_data['data']['me']
-        print(data)
         if data is None:
             bot.send_message(message.chat.id, "Token anda sudah expired. Silahkan login kembali")
         else:
