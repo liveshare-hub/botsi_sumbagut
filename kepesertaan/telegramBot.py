@@ -220,36 +220,36 @@ query{
 
 @bot.message_handler(commands=['update'])
 def updateData(message):
-    if not cek_login(bot, message):
-        bot.send_message(message.chat.id,"Silahkan login terlebih dahulu")
-    else:
-        texts = message.text.split(' ')
-        jabatan = texts[1]
-        bidang = texts[2]
-        kdKantor = texts[3]
-        idTelegram = message.chat.id
+    # if not cek_login(bot, message):
+    #     bot.send_message(message.chat.id,"Silahkan login terlebih dahulu")
+    # else:
+    texts = message.text.split(' ')
+    jabatan = texts[1]
+    bidang = texts[2]
+    kdKantor = texts[3]
+    idTelegram = message.chat.id
 
-        if len(texts) < 2:
-            bot.send_message(idTelegram, "Format Salah!")
-        else:
-            query = """
+    if len(texts) < 2:
+        bot.send_message(idTelegram, "Format Salah!")
+    else:
+        query = """
 mutation{
   updateAccount(jabatan:%d, bidang:%d, kdKantor:%d, idTelegram:%s) {
     success
     errors
   }
 }        
-            """ % (jabatan, bidang, kdKantor, idTelegram)
+        """ % (jabatan, bidang, kdKantor, idTelegram)
 
-            post_json = requests.post(url, json={'query':query})
-            json_data = json.loads(post_json.text)
-            data = json_data['data']['updateAccount']
-            if data['success'] == True:
-                qs = ExtendUser.objects.filter(id_telegram=idTelegram)[0]
-                pesan = "Data {} berhasil diupate".format(qs.username)
-                bot.send_message(idTelegram, pesan)
-            else:
-                bot.send_message(idTelegram,"Terjadi Kesalahan!. Hubungi Administrator")
+        post_json = requests.post(url, json={'query':query})
+        json_data = json.loads(post_json.text)
+        data = json_data['data']['updateAccount']
+        if data['success'] == True:
+            qs = ExtendUser.objects.filter(id_telegram=idTelegram)[0]
+            pesan = "Data {} berhasil diupate".format(qs.username)
+            bot.send_message(idTelegram, pesan)
+        else:
+            bot.send_message(idTelegram,"Terjadi Kesalahan!. Hubungi Administrator")
 
 @bot.message_handler(commands=['infoAll'])
 def infoall(message):
