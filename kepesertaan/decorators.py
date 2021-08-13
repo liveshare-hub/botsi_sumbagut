@@ -18,8 +18,4 @@ def cek_login(bot, message):
     user = message.chat.id
     status = False
     qs = ExtendUser.objects.filter(id_telegram=user)
-    if not qs:
-       
-       return False
-    else:
-        return True
+    return qs
