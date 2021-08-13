@@ -136,8 +136,31 @@ mutation{
         headers = {"Authorization":"JWT %s"} % kd_token
         post_json = requests.post(url, json={'query':query,'headers':headers})
         json_data = json.loads(post_json.text)
-        data = json_data
+        data = json_data['data']['verifyToken']['payload']
+        bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
 
+@bot.message_handler(commands=['me'])
+def cek_me(message):
+    texts = message.text.split(' ')
+    if texts[0] == '/me':
+        query = """
+query{
+  me{
+    username
+  }
+}
+        """
+        get_json = requests.get(url, json={'query':query})
+        json_data = json.loads(get_json.text)
+        print(get_json.status_code)
+        data = json_data['data']['me']
+        if data == 'null':
+            bot.send_message(message.chat.id, "Token anda sudah expired. Silahkan login kembali")
+        else:
+            pesan = """
+Username anda = {}
+            """.format(data['username'])
+            bot.send_message(message.chat.id, pesan)
 
 @bot.message_handler(commands=['help'])
 def help(message):
