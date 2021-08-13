@@ -118,11 +118,12 @@ Dan refresh token:
 
 @bot.message_handler(commands=['token'])
 def token(message):
+    global kd_token
     texts = message.text.split(' ')
     if len(texts) < 2:
         bot.send_message(message.chat.id, "Format Salah!")
     else:
-        global kd_token = texts[1]
+        kd_token = texts[1]
         query = """
 mutation{
   verifyToken(
