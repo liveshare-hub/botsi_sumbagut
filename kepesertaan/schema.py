@@ -85,6 +85,7 @@ class AuthMutation(graphene.ObjectType):
     verify_account = mutations.VerifyAccount.Field()
     token_auth = mutations.ObtainJSONWebToken.Field()
     update_account = mutations.UpdateAccount.Field()
+    verify_token = mutations.VerifyToken.Field()
     
 
 class Query(UserQuery, MeQuery, graphene.ObjectType):
@@ -113,6 +114,7 @@ class Query(UserQuery, MeQuery, graphene.ObjectType):
 
     def resolve_all_detil_mkro(root, info, npp):
         user = info.context.user
+        print(user)
         if user.is_authenticated:
             return DetilMkro.objects.all().filter(npp=npp).order_by('-tgl_upload')[:1]
         else:

@@ -100,16 +100,44 @@ mutation{
     if data['success'] == True:
         pesan = """
 Anda berhasil login.
-Silahkan update data anda terlebih dahulu 
+Berikut token anda :
+<b>{}</b>
+Kemudian lakukan verifikasi token.
 dengan cara:
-/update nama_jabatan nama_bidang kd_kantor id_telegram
+/token token_anda
 
-            """
+Dan refresh token:
+<i>{}</i>
+
+            """.format(data['token'], data['refreshToken'])
         bot.send_message(message.chat.id, pesan)
     elif data is None:
         bot.send_message(message.chat.id, "Data anda tidak ditemukan. Silahkan Registrasi!")
     else:
         bot.send_message(message.chat.id, "Username atau Password anda Salah!")
+
+@bot.message_handler(commands=['token'])
+def token(message):
+    texts = message.text.split(' ')
+    if len(texts) < 2:
+        bot.send_message(message.chat.id, "Format Salah!")
+    else:
+        kd_token = texts[1]
+        query = """
+mutation{
+  verifyToken(
+    token:"%s"
+  ) {
+    success
+    errors
+  }
+}
+        """ % (kd_token)
+        headers = {"Authorization":"JWT %s"} % kd_token
+        post_json = requests.post(url, json={'query':query,'headers':headers})
+        json_data = json.loads(post_json.text)
+        data = json_data
+
 
 @bot.message_handler(commands=['help'])
 def help(message):
