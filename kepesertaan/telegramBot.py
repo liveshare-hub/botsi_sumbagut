@@ -224,9 +224,9 @@ def updateData(message):
     #     bot.send_message(message.chat.id,"Silahkan login terlebih dahulu")
     # else:
     texts = message.text.split(' ')
-    jabatan = texts[1]
-    bidang = texts[2]
-    kdKantor = texts[3]
+    jabatan = int(texts[1])
+    bidang = int(texts[2])
+    kdKantor = int(texts[3])
     idTelegram = message.chat.id
 
     if len(texts) < 2:
