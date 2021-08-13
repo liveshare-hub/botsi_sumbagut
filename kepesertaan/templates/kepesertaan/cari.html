@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %} JKK Tahap I PU{% endblock  %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    Form Download JKK Tahap I PU
+  </div>
+  <div class="card-body">
+    <form method="POST">
+    {% csrf_token %}
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="kd_kantor">Kode Kantor</label>
+          {{form.kd_kantor}}
+        </div>
+        
+        
+      </div>
+
+      
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="tgl">Periode</label>
+          {{form.tgl}}
+        </div>
+        
+        
+      </div>
+      
+      <div class="row">
+      <div class="col">
+        <button type="submit" class="btn btn-primary" id="submit">SUBMIT</button>
+      </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock  %}
+
+{% block script %}
+
+
+{% endblock  %}

@@ -1,16 +1,15 @@
 from django.contrib import admin
-
-from .models import Bidang, Profile
-
-admin.site.register(Bidang)
-admin.site.register(Profile)
+from .models import ExtendUser, m_bidang, m_jabatan, kode_kantor
+from django.apps import apps
+# Register your models here.
 
 
-# class UserAccountAdmin(admin.ModelAdmin):
-#     list_display = ('id', 'username', 'name', 'bidang',
-#                     'email', 'is_staff', 'is_kabid')
-#     list_display_links = ('id', 'username')
-#     search_fields = ('username', 'name', 'bidang', 'email',)
+admin.site.register(ExtendUser)
+admin.site.register(m_jabatan)
+admin.site.register(m_bidang)
+admin.site.register(kode_kantor)
 
+app = apps.get_app_config('graphql_auth')
 
-# admin.site.register(UserAccount, UserAccountAdmin)
+for model_name, model in app.models.items():
+    admin.site.register(model)
