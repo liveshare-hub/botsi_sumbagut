@@ -154,8 +154,9 @@ query{
         """
         get_json = requests.get(url, json={'query':query})
         json_data = json.loads(get_json.text)
-        print(get_json.status_code)
+        
         data = json_data['data']['me']
+        print(data)
         if data == 'null':
             bot.send_message(message.chat.id, "Token anda sudah expired. Silahkan login kembali")
         else:
