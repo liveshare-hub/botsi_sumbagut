@@ -157,7 +157,7 @@ query{
         json_data = json.loads(get_json.text)
         
         data = json_data['data']['me']
-        print(data['username'])
+        print(data)
         if data is None:
             bot.send_message(message.chat.id, "Token anda sudah expired. Silahkan login kembali")
         else:
