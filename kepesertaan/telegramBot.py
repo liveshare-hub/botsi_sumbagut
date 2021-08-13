@@ -153,7 +153,8 @@ query{
   }
 }
         """
-        get_json = requests.get(url, json={'query':query})
+        headers = {"Authorization":"JWT %s" % (kd_token)}
+        get_json = requests.get(url, json={'query':query,'headers':headers})
         json_data = json.loads(get_json.text)
         
         data = json_data['data']['me']
