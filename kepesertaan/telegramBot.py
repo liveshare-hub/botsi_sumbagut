@@ -152,7 +152,7 @@ query{
   }
 }
         """
-        headers = {"Authorization":"JWT %s" % (kd_token)}
+        headers = {"Authorization":"JWT %s","Content-Type":"application/json","User-Agent":"PostmanRuntime/7.28.3" % (kd_token)}
         get_json = requests.get(url, json={'query':query,'headers':headers})
         print(get_json.text)
         json_data = json.loads(get_json.text)
