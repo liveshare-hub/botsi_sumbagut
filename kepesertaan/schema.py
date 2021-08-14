@@ -48,6 +48,25 @@ class DetilMkroType(DjangoObjectType):
         model = DetilMkro
         exclude = ('no',)
 
+class UpdateUserMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+        jabatan = graphene.ID()
+        bidang = graphene.ID()
+        kd_kantor = graphene.ID()
+    
+    users = graphene.Field(ExtendUserType)
+
+    @classmethod
+    def mutate(cls, root, info, jabatan, bidang, kd_kantor, id):
+        users = ExtendUser.objects.get(pk=id)
+        users.jabatan_id = jabatan
+        users.bidang_id = bidang
+        users.kd_kantor_id = kd_kantor
+        users.save()
+
+        return UpdateUserMutation(users=users)
+
 class TargetRealisasiMutation(graphene.Mutation):
     class Arguments:
         jenis = graphene.ID()
@@ -94,7 +113,8 @@ class Query(UserQuery, MeQuery, graphene.ObjectType):
     all_jabatan = graphene.List(JabatanType)
     all_bidang = graphene.List(BidangType)
     all_kode_kantor = graphene.List(KodeKantorType)
-    all_detil_mkro = graphene.List(DetilMkroType, npp=graphene.String())
+    all_detil_mkro = graphene.List(DetilMkroType, npp=graphene.String(), user=graphene.ID())
+    detil_user_id = graphene.List(ExtendUserType, telegram=graphene.String())
     pass
 
     def resolve_all_target_realisasi(root, info, periode=None, user=None):
@@ -112,16 +132,19 @@ class Query(UserQuery, MeQuery, graphene.ObjectType):
     def resolve_all_kode_kantor(root, info, **kwargs):
         return kode_kantor.objects.all()
 
-    def resolve_all_detil_mkro(root, info, npp):
+    def resolve_all_detil_mkro(root, info, npp, user):
+        
+        return DetilMkro.objects.all().filter(npp=npp, kode_pembina=user).order_by('-tgl_upload')[:1]
+    
+    def resolve_detil_user_id(root, info, telegram):
         user = info.context.user
         print(user)
-        if user.is_authenticated:
-            return DetilMkro.objects.all().filter(npp=npp).order_by('-tgl_upload')[:1]
-        else:
-            return DetilMkro.objects.none()
+        return ExtendUser.objects.filter(id_telegram=telegram)[:1]
+
 class Mutation(AuthMutation, graphene.ObjectType):
     # buat_tugas = TugasKerjaMutation.Field()
     target_realisasi = TargetRealisasiMutation.Field()
+    update_user = UpdateUserMutation.Field()
     pass
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

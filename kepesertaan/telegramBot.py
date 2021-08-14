@@ -4,12 +4,12 @@ from datetime import datetime
 from django.conf import settings
 from accounts.models import ExtendUser
 
-from .decorators import cek_login
+from .decorators import restricted
 
 bot = telebot.TeleBot(settings.BOT_API, parse_mode='html')
 url = "http://localhost:8000/graphql"
 
-qs = ExtendUser.objects.all()
+# qs = ExtendUser.objects.all()
 
 @bot.message_handler(commands=['start',])
 def start(message):
@@ -54,15 +54,21 @@ errors
         json_data = json.loads(post_json.text)
         # print(json_data)
         if post_json.status_code == 200:
-            cek = qs.filter(username=username)[0]
+            qs = ExtendUser.objects.filter(username=username)[0]
+            token = qs.token_auth
+            # cek = qs.filter(username=username)[0]
             data = json_data['data']['register']
             if data['success'] == True:
                 pesan = """
 Akun <b>{}</b> sudah berhasil didaftarkan.
-Silahkan cek email anda untuk verifikasi
+Berikut token anda :
 
+{}
+
+Kemudian verifikasi dengan cara:
+/token token_anda
 Terima Kasih
-                """.format(username)
+                """.format(username, token)
             # print(json_data)
                 bot.send_message(user, pesan)
         else:
@@ -76,11 +82,25 @@ Terima Kasih
 #             bot.send_message(message.chat.id, error['message'])
 
 @bot.message_handler(commands=['login'])
-def login(message):
+def masuk(message):
     texts = message.text.split(' ')
-    username = texts[1]
-    password = texts[2]
-    query = """
+    if len(texts) < 2:
+        bot.send_message(message.chat.id,"Format Salah")
+    else:
+        username = texts[1]
+        password = texts[2]
+    # print(password)
+    # qs = ExtendUser.objects.filter(username=username, password=password)
+    # print(qs)
+    # if not qs or qs is None:
+#         pesan = """
+# Username/password anda salah.
+# Atau Akun anda belum terdaftar.
+#         """
+    #     bot.send_message(message.chat.id, pesan)
+    # else:
+        # bot.send_message(message.chat.id,"Login Anda Berhasil")
+        query = """
 mutation{
   tokenAuth(username:"%s",password:"%s") {
     token
@@ -91,34 +111,32 @@ mutation{
   }
 }
 
-    """ % (username, password)
-    post_json = requests.post(url, json={'query':query})
-    json_data = json.loads(post_json.text)
-    # print(post_json.status_code)
-    # if post_json.status_code == 200:
-    data = json_data['data']['tokenAuth']
-    if data['success'] == True:
-        pesan = """
+        """ % (username, password)
+        post_json = requests.post(url, json={'query':query})
+        json_data = json.loads(post_json.text)
+        data = json_data['data']['tokenAuth']
+        if data['success'] == True:
+            pesan = """
 Anda berhasil login.
-Berikut token anda :
-<b>{}</b>
-Kemudian lakukan verifikasi token.
-dengan cara:
-/token token_anda
 
-Dan refresh token:
-<i>{}</i>
+Berikut perintah yang tersedia :
+1. Cek Detail NPP Binaan
+   contoh : /infoAll AA020015
 
-            """.format(data['token'], data['refreshToken'])
-        bot.send_message(message.chat.id, pesan)
-    elif data is None:
-        bot.send_message(message.chat.id, "Data anda tidak ditemukan. Silahkan Registrasi!")
-    else:
-        bot.send_message(message.chat.id, "Username atau Password anda Salah!")
+2. On progress
+
+
+        """
+            obj, created = ExtendUser.objects.update_or_create(username=username, defaults={'token_auth':data['token'], 'id_telegram':message.chat.id})
+            bot.send_message(message.chat.id, pesan)
+    # elif data is None:
+    #     bot.send_message(message.chat.id, "Data anda tidak ditemukan. Silahkan Registrasi!")
+    # else:
+    #     bot.send_message(message.chat.id, "Username atau Password anda Salah!")
 
 @bot.message_handler(commands=['token'])
-def token(message):
-    global kd_token
+def authToken(message):
+    
     texts = message.text.split(' ')
     if len(texts) < 2:
         bot.send_message(message.chat.id, "Format Salah!")
@@ -134,45 +152,18 @@ mutation{
   }
 }
         """ % (kd_token)
-        headers = {"Authorization":"JWT %s" % (kd_token)}
-        post_json = requests.post(url, json={'query':query,'headers':headers})
-        json_data = json.loads(post_json.text)
-        data = json_data['data']['verifyToken']
+#         headers = {"Authorization":"JWT %s" % (kd_token)}
+        # post_json = requests.post(url, json={'query':query})
+        # json_data = json.loads(post_json.text)
+        # data = json_data['data']['verifyToken']
         # username = data['payload']['username']
-        bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
-
-@bot.message_handler(commands=['me'])
-def cek_me(message):
-    texts = message.text.split(' ')
-    if texts[0] == '/me':
-        query = """
-query{
-  me{
-    username
-  }
-}
-        """
-        headers = {
-        'Authorization':'JWT %s' % (kd_token),
-        'Connection': 'keep-alive',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'X-Requested-With': 'XMLHttpRequest',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept-Language': 'en-US,en;q=0.9',
-    }
-        get_json = requests.get(url, json={'query':query,'headers':headers})
-        print(get_json.text)
-        json_data = json.loads(get_json.text)
-        
-        data = json_data['data']['me']
-        if data is None:
-            bot.send_message(message.chat.id, "Token anda sudah expired. Silahkan login kembali")
+        qs = ExtendUser.objects.filter(token_auth=kd_token)
+        username = qs[0].username
+        if not qs or qs is None:
+            bot.send_message(message.chat.id, "Token Expired!")
         else:
-            pesan = """
-Username anda = {}
-            """.format(data['username'])
-            bot.send_message(message.chat.id, pesan)
+            qs.update_or_create(username=username, defaults={'id_telegram':message.chat.id})
+            bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
 
 @bot.message_handler(commands=['help'])
 def help(message):
@@ -195,7 +186,9 @@ Cara Mendaftarkan akun :
 
 contoh :
 /register my_email@email.com MU150710 Welcome1 Welcome1
-Kemudaian cek email untuk dilakukan verifikasi akun anda
+
+Verifikasi token :
+/token token_anda
 
 Cara login:
 /login username password
@@ -283,41 +276,71 @@ query{
 
 @bot.message_handler(commands=['update'])
 def updateData(message):
-    # if not cek_login(bot, message):
-    #     bot.send_message(message.chat.id,"Silahkan login terlebih dahulu")
-    # else:
+
     texts = message.text.split(' ')
-    jabatan = int(texts[1])
-    bidang = int(texts[2])
-    kdKantor = int(texts[3])
-    idTelegram = message.chat.id
-
     if len(texts) < 2:
-        bot.send_message(idTelegram, "Format Salah!")
+        bot.send_message(message.chat.id, "Format Perintah Salah!")
     else:
-        query = """
+        username = texts[1]
+        qs = ExtendUser.objects.filter(username=username).first()
+        # print(qs.id_telegram)
+        # print(message.chat.id)
+        if int(qs.id_telegram) == message.chat.id:
+            jabatan = int(texts[2])
+            bidang = int(texts[3])
+            kdKantor = int(texts[4])
+            idTelegram = str(message.chat.id)
+            query = """
 mutation{
-  updateAccount(jabatan:%d, bidang:%d, kdKantor:%d, idTelegram:%s) {
-    success
-    errors
+  updateUser(id:%d, bidang:%d, jabatan:%d, kdKantor:%d){
+    users{
+      id
+      username
+      bidang{
+        id
+        namaBidang
+      }
+      jabatan{
+        id
+        namaJabatan
+      }
+      kdKantor{
+        id
+        namaKantor
+        kdKantor
+      }
+    }
   }
-}        
-        """ % (jabatan, bidang, kdKantor, idTelegram)
+}
+            """ % (qs.pk, jabatan, bidang, kdKantor)
 
-        post_json = requests.post(url, json={'query':query})
-        json_data = json.loads(post_json.text)
-        data = json_data['data']['updateAccount']
-        if data['success'] == True:
-            qs = ExtendUser.objects.filter(id_telegram=idTelegram)[0]
-            pesan = "Data {} berhasil diupate".format(qs.username)
-            bot.send_message(idTelegram, pesan)
-        else:
-            bot.send_message(idTelegram,"Terjadi Kesalahan!. Hubungi Administrator")
+            post_json = requests.post(url, json={'query':query})
+            json_data = json.loads(post_json.text)
+            # print(json_data)
+            data = json_data['data']['updateUser']['users']
+            if data is not None:
+                pesan = """
+Data user <b>{}</b> berhasil diupdate.
+
+Kantor : {} - {}
+
+Jabatan : {}
+
+Bidang : {}
+                """.format(data['username'], data['kdKantor']['kdKantor'], data['kdKantor']['namaKantor'],
+                    data['jabatan']['namaJabatan'],data['bidang']['namaBidang'])
+                bot.send_message(idTelegram, pesan)
+            # else:
+            #     bot.send_message(idTelegram,"Terjadi Kesalahan!. Hubungi Administrator")
+        elif int(qs.id_telegram) != message.chat.id:
+            bot.send_message(message.chat.id, "Username harus sesuai")
 
 @bot.message_handler(commands=['infoAll'])
 def infoall(message):
-    if not cek_login(bot, message):
-        bot.send_message(message.chat.id,"Silahkan login terlebih dahulu")
+    qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
+    
+    if qs.token_auth is None:
+        bot.send_message(message.chat.id,"Authorized User Only!")
     else:
         texts = message.text.split(' ')
         npp = texts[1]
@@ -353,9 +376,18 @@ query GetData($npp: String = "%s"){
             """ % (npp)
             get_json = requests.get(url, json={'query':query})
             json_data = json.loads(get_json.text)
-            
-            if len(json_data['data']['allDetilMkro']) < 1:
-                bot.send_message(message.chat.id, "Pastikan NPP benar atau sesuai dengan binaan Anda")
+            data = json_data['data']['allDetilMkro']
+            if data is None:
+                pesan = """
+Pastikan <b>NPP</> yang anda input adalah benar.
+Dan atau sesuai dengan binaan anda.
+
+
+
+
+<b>**</b><i>botsi kanwil sumbagut</i>
+                """
+                bot.send_message(message.chat.id, pesan)
             else:
                 data = json_data['data']['allDetilMkro'][0]
                 if data['kepsJp'] == '' or data['kepsJP'] == '- ' or data['kepsJp'] is None:
@@ -394,33 +426,53 @@ SIPP : {}
                 bot.send_message(message.chat.id, pesan)
 
 @bot.message_handler(commands=['profile'])
+
 def profile(message):
-    if not cek_login(bot, message):
-        bot.send_message(message.chat.id,"Silahkan login terlebih dahulu")
+    qs = ExtendUser.objects.filter(id_telegram=message.chat.id).exists()
+    if not qs:
+
+        bot.send_message(message.chat.id,"Authorized user only")
     else:
-        qs = ExtendUser.objects.filter(id_telegram=message.chat.id)[0]
-        if not qs:
-            bot.send_message(message.chat.id, "Silahkan melakukan update pada profile anda")
-        else:
-            user = qs.username
-            name = message.chat.first_name
-            jabatan = qs.jabatan.nama_jabatan
-            bidang = qs.bidang.nama_bidang
-            kantor = qs.kd_kantor.nama_kantor
-            idTelegram = qs.id_telegram
-            pesan = """
-Data Profile {} :
+        query = """
+query{
+  detilUserId(telegram:"1435940099") {
+    id
+    username
+    jabatan{
+      namaJabatan
+    }
+    bidang{
+      namaBidang
+    }
+    kdKantor{
+      kdKantor
+      namaKantor
+    }
+   
+  }
+}
+        """
+        get_json = requests.get(url, json={'query':query})
+        json_data = json.loads(get_json.text)
+        data = json_data['data']['detilUserId'][0]
+        user = data['username']
+        kantor = data['kdKantor']['kdKantor']+' - '+data['kdKantor']['namaKantor']
+        jabatan = data['jabatan']['namaJabatan']
+        bidang = data['bidang']['namaBidang']
+        pesan = """
+Detil Profile <b><u>{}</u></b>:
 
-Username = {}
-Nama = {}
-jabatan = {}
-Bidang = {}
-Kantor = {}
-Id Telegram = {}
+<pre>
+Nama    : {}
+Jabatan : {}
+Bidang  : {}
+Kantor  : {}
 
-Terima Kasih
-            """.format(user, name, jabatan, bidang, kantor, idTelegram)
-            bot.send_message(message.chat.id, pesan)
+</pre>
+
+<b>**</b><i>Botsi Kanwil Sumbagut</i>
+        """.format(user, message.chat.first_name, jabatan, bidang, kantor)
+        bot.send_message(message.chat.id, pesan)
 
 print('Bot is Running')
 bot.polling()

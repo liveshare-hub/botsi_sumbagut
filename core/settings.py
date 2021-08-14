@@ -187,7 +187,6 @@ GRAPHQL_AUTH = {
         "jabatan":"Int",
         "bidang":"Int",
         "kd_kantor":"Int",
-        "id_telegram":"String",
     }
 }
 

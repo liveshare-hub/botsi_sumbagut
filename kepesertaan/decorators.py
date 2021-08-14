@@ -1,21 +1,14 @@
 from accounts.models import ExtendUser
 
-
-# def login_only(view_func):
-#     def wrapper_func(message, *args, **kwargs):
-#         group = None
-#         user = message.chat.id
-#         qs = ExtendUser.objects.get(id_telegram=user)
-#         if qs.DoesNotExist:
-#             bot.send_message(user, "User anda tidak dikenal. Silahkan Login terlebih dahulu")
-
-#         else:
-            
-#             return view_func(request, *args, **kwargs)
-#     return wrapper_func
-
-def cek_login(bot, message):
-    user = message.chat.id
-    status = False
-    qs = ExtendUser.objects.filter(id_telegram=user)
-    return qs
+def restricted(func):
+    """Restrict usage of func to allowed users only and replies if necessary"""
+    # @wraps(func)
+    def wrapped(bot, update, *args, **kwargs):
+        user_id = update.message.chat.id
+        qs = ExtendUser.objects.filter(id_telegram=user_id).exists()
+        if qs:
+            print("WARNING: Unauthorized access denied for {}.".format(user_id))
+            update.message.reply_text('User disallowed.')
+            return  # quit function
+        return func(bot, update, *args, **kwargs)
+    return wrapped
