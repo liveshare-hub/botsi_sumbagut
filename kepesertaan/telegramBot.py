@@ -198,8 +198,9 @@ Update Akun :
 Setelah berhasil login <b>di WAJIBKAN</b>
 bagi anda untuk melakukan update akun
 seperti jabata, bidang, kode kantor dan id telegram
-/update id_jabatan id_bidang id_kantor
-contoh : /update 1 1 1
+
+/update <b>username id_jabatan id_bidang id_kantor</b>
+contoh : /update MU150710 1 1 1
 
 Menampilakn Profile Akun:
 /profile
@@ -338,8 +339,9 @@ Bidang : {}
 @bot.message_handler(commands=['infoAll'])
 def infoall(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
-    
-    if qs.token_auth is None:
+    if qs is None:
+        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+    elif qs.token_auth is None:
         bot.send_message(message.chat.id,"Authorized User Only!")
     else:
         texts = message.text.split(' ')
