@@ -36,8 +36,11 @@ def newRegister(message):
         username = texts[2]
         password1 = texts[3]
         password2 = texts[4]
-        
-        query = """
+        qs = ExtendUser.objects.filter(username=username).first()
+        if qs.username == username and qs.id_telegram == user:
+            bot.send_message(user, "Username anda sudah pernah terdaftar")
+        else:
+            query = """
 mutation{
 register(email:"%s",username:"%s", password1:"%s", password2:"%s")
 {
@@ -48,18 +51,18 @@ errors
 
 }
 }
-        """ % (email, username, password1, password2)
+            """ % (email, username, password1, password2)
 
-        post_json = requests.post(url, json={'query':query})
-        json_data = json.loads(post_json.text)
+            post_json = requests.post(url, json={'query':query})
+            json_data = json.loads(post_json.text)
         # print(json_data)
-        if post_json.status_code == 200:
-            qs = ExtendUser.objects.filter(username=username)[0]
-            token = qs.token_auth
+            if post_json.status_code == 200:
+                qs = ExtendUser.objects.filter(username=username)[0]
+                token = qs.token_auth
             # cek = qs.filter(username=username)[0]
-            data = json_data['data']['register']
-            if data['success'] == True:
-                pesan = """
+                data = json_data['data']['register']
+                if data['success'] == True:
+                    pesan = """
 Akun <b>{}</b> sudah berhasil didaftarkan.
 Berikut token anda :
 
@@ -68,11 +71,11 @@ Berikut token anda :
 Kemudian verifikasi dengan cara:
 /token token_anda
 Terima Kasih
-                """.format(username, token)
+                    """.format(username, token)
             # print(json_data)
-                bot.send_message(user, pesan)
-        else:
-            bot.send_message(user, "Username sudah terdaftar")
+                    bot.send_message(user, pesan)
+            else:
+                bot.send_message(user, "[]")
             
         
 
