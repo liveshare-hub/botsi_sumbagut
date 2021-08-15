@@ -36,8 +36,8 @@ def newRegister(message):
         username = texts[2]
         password1 = texts[3]
         password2 = texts[4]
-        qs = ExtendUser.objects.filter(username=username, id_telegram=message.chat.id).exists()
-        if qs:
+        qs = ExtendUser.objects.filter(username=username, id_telegram=message.chat.id)
+        if qs.exists() or qs[0].id_telegram == message.chat.id:
             bot.send_message(user, "Username anda sudah pernah terdaftar")
         else:
             query = """
