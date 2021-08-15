@@ -336,7 +336,7 @@ mutation{
 
             post_json = requests.post(url, json={'query':query})
             json_data = json.loads(post_json.text)
-            print(json_data)
+            # print(json_data)
             # data = json_data['data']['updateUser']['users']
             if json_data['data']['updateUser'] is not None:
                 data = json_data['data']['updateUser']['users']
