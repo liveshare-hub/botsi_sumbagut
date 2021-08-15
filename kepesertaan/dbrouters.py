@@ -1,6 +1,7 @@
 from .models import TargetRealisasi, JenisUraian, Uraian
 from accounts.models import m_jabatan, m_bidang, kode_kantor, ExtendUser
 from detil_mkro.models import DetilMkro
+from django.conf import settings
 
 class KepesertaanDBRouter:
     def db_for_read(self, model, **hints):
@@ -16,9 +17,7 @@ class KepesertaanDBRouter:
 
         return None
 
-    def allow_migrate(self, model, **hints):
-        if (model == TargetRealisasi) or (model == JenisUraian) or (model == Uraian)\
-            or (model == m_bidang) or (model == m_jabatan) or (model == kode_kantor)\
-                or (model == ExtendUser)
-            return 'default'
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
+        if app_label in settings.DATABASES:
+            return db == 'default'
         return None
