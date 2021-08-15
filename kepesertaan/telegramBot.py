@@ -455,9 +455,10 @@ def profile(message):
 
         bot.send_message(message.chat.id,"Authorized user only")
     else:
+        telegram = str(message.chat.id)
         query = """
 query{
-  detilUserId(telegram:"1435940099") {
+  detilUserId(telegram:"%s") {
     id
     username
     jabatan{
@@ -473,7 +474,7 @@ query{
    
   }
 }
-        """
+        """ % ()
         get_json = requests.get(url, json={'query':query})
         json_data = json.loads(get_json.text)
         data = json_data['data']['detilUserId'][0]
