@@ -36,9 +36,9 @@ def newRegister(message):
         username = texts[2]
         password1 = texts[3]
         password2 = texts[4]
-        qs = ExtendUser.objects.filter(username=username)
-        if qs.exists() or qs.first().id_telegram == message.chat.id:
-            bot.send_message(user, "Username anda sudah pernah terdaftar")
+        qs = ExtendUser.objects.filter(id_telegram=message.chat.id)
+        if qs.exists():
+            bot.send_message(user, "Anda tidak dapat mendaftarkan akun lagi!")
         else:
             query = """
 mutation{
