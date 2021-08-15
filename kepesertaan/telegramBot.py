@@ -202,7 +202,7 @@ Setelah berhasil login <b>di WAJIBKAN</b>
 bagi anda untuk melakukan update akun
 seperti jabata, bidang, kode kantor dan id telegram
 
-/update <b>username id_jabatan id_bidang id_kantor</b>
+/update <b>username id_bidang id_jabatan id_kantor</b>
 contoh : /update MU150710 1 1 1
 
 Menampilakn Profile Akun:
