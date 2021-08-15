@@ -283,7 +283,23 @@ def updateData(message):
 
     texts = message.text.split(' ')
     if len(texts) < 2:
+        pesan = """"
+Format Perintah anda salah!
+
+Format seharusnya :
+/update username id_bidang id_jabatan id_kdKantor
+
+contoh :
+id bidang TI = 7
+id jabatan staff = 5
+id kantor 901 = 1
+
+/update MU150710 7 5 1
+
+<b>**</b><i>botsi sumbagut</i>
+        """
         bot.send_message(message.chat.id, "Format Perintah Salah!")
+        bot.send_message(message.chat.id, "/update ")
     else:
         username = texts[1]
         qs = ExtendUser.objects.filter(username=username).first()
@@ -391,7 +407,7 @@ Dan atau sesuai dengan binaan anda.
 
 
 
-<b>**</b><i>botsi kanwil sumbagut</i>
+<b>**</b><i>botsi sumbagut</i>
                 """
                 bot.send_message(message.chat.id, pesan)
             else:
@@ -476,7 +492,7 @@ Kantor  : {}
 
 </pre>
 
-<b>**</b><i>Botsi Kanwil Sumbagut</i>
+<b>**</b><i>botsi sumbagut</i>
         """.format(user, message.chat.first_name, jabatan, bidang, kantor)
         bot.send_message(message.chat.id, pesan)
 
