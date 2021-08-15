@@ -474,7 +474,7 @@ query{
    
   }
 }
-        """ % ()
+        """ % (telegram)
         get_json = requests.get(url, json={'query':query})
         json_data = json.loads(get_json.text)
         data = json_data['data']['detilUserId'][0]
