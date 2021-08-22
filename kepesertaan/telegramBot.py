@@ -4,7 +4,12 @@ from datetime import datetime
 from django.conf import settings
 from accounts.models import ExtendUser
 
+from telebot import apihelper
+
 from .decorators import restricted
+
+apihelper.ENABLE_MIDDLEWARE = True
+apihelper.SESSION_TIME_TO_LIVE = 5 * 60
 
 bot = telebot.TeleBot(settings.BOT_API, parse_mode='html')
 url = "http://localhost:8000/graphql"
