@@ -376,8 +376,8 @@ contoh : /infoAll AA020015
             bot.send_message(message.chat.id, pesan)
         else:
             query = """
-query GetData($npp: String = "%s"){
-        allDetilMkro(npp:$npp){
+query{
+  allDetilMkro(npp:"%s",user:"%s"){
             kodePembina
             namaPembina
             npp
@@ -395,10 +395,11 @@ query GetData($npp: String = "%s"){
         }
                 
     }    
-            """ % (npp)
+            """ % (npp, qs.username)
             get_json = requests.get(url, json={'query':query})
             json_data = json.loads(get_json.text)
             data = json_data['data']['allDetilMkro']
+            
             if data is None:
                 pesan = """
 Pastikan <b>NPP</> yang anda input adalah benar.
