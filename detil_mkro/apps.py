@@ -9,4 +9,4 @@ class DetilMkroConfig(AppConfig):
         from detil_mkro import executor
     
 
-       executor.mulai()
+         executor.mulai()
