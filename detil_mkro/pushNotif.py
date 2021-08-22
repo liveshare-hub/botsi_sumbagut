@@ -6,8 +6,9 @@ from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
 
-today = timezone.now()
-yt = today - timedelta(days=7)
+
+today = timezone.localtime(timezone.now())
+yt = today - timedelta(days=1)
 yt_t = yt + timedelta(days=2)
 
 def sendNotif():
@@ -15,7 +16,7 @@ def sendNotif():
     
     qs = DetilMkro.objects.all()
     for user in users:
-        datas = qs.filter(tgl_upload__range=(yt,yt_t))
+        datas = qs.filter(tgl_upload__range=(yt,today))
         locale.setlocale(locale.LC_ALL,'')
         if datas.exists():
             for data in datas:
