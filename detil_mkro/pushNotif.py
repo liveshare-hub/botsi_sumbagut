@@ -11,6 +11,8 @@ today = timezone.localtime(timezone.now())
 yt = today - timedelta(days=1)
 yt_t = yt + timedelta(days=2)
 
+url = "https://api.telegram.org/bot{}/sendMessage".format(settings.BOT_API)
+
 def sendNotif():
     users = ExtendUser.objects.filter(is_superuser=False)
     
@@ -51,7 +53,6 @@ SIPP : {}
                 """.format(data.kode_pembina, data.nama_pembina, data.nama_prsh, data.keps_awal,
                     jp, blthna, data.prog, data.total_tk_aktif, locale.currency(data.total_iuran_berjalan, grouping=True),
                         data.blth_akhir, sipp)
-                url = "https://api.telegram.org/bot{}/sendMessage".format(settings.BOT_API)
                 # print(url)
 
                 payload = {
