@@ -467,7 +467,7 @@ Dan atau sesuai dengan binaan anda.
                         else:
                             itw = 'TIDAK'
 
-                        locale.setlocale(locale.LC_MONETARY, 'IND')
+                        locale.setlocale(locale.LC_MONETARY, 'id_ID')
                         iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
                         pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
