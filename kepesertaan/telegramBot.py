@@ -3,6 +3,7 @@ import requests, json
 from datetime import datetime
 from django.conf import settings
 from accounts.models import ExtendUser
+from detil_mkro.models import DetilMkro
 
 from telebot import apihelper
 
@@ -454,25 +455,69 @@ SIPP : {}
                 bot.send_message(message.chat.id, pesan)
 
 
-# @bot.message_handler(commands=['infoDetil'])
-# def infoDetil(message):
-#     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
-#     if qs is None:
-#         bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
-#     elif qs.token_auth is None:
-#         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
-#     else:
-#         texts = message.text.split(' ')
-#         npp = texts[1]
+@bot.message_handler(commands=['infoDetil'])
+def infoDetil(message):
+    qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
+    if qs is None:
+        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+    elif qs.token_auth is None:
+        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+    else:
+        texts = message.text.split(' ')
+        npp = texts[1]
         
-#         if len(texts) < 2:
-#             pesan = """
-# Format anda <b>Salah</b>
-# Gunakan perintah /infoAll no_npp_binaan_anda
-# contoh : /infoAll AA020015
-#         """
-#             bot.send_message(message.chat.id, pesan)
-#         else:
+        if len(texts) < 2:
+            pesan = """
+Format anda <b>Salah</b>
+Gunakan perintah /infoAll no_npp_binaan_anda
+contoh : /infoAll AA020015
+        """
+            bot.send_message(message.chat.id, pesan)
+        else:
+            query = DetilMkro.objects.filter(kode_pembina=qs.username, npp=npp).first()
+            if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                keps_jp = 'Tidak'
+            else:
+                keps_jp = query.keps_jp
+            if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                blthNa = 'Aktif'
+            else:
+                blthNa = 'NA sejak :' + query.blth_na
+            if query.sipp == 1 or query.sipp == '1':
+                sipp = 'YA'
+            else:
+                sipp = 'TIDAK'
+            if query.itw == 1 or query.itw == '1':
+                itw = 'YA'
+            else:
+                itw = 'TIDAK'
+
+            locale.setlocale(locale.LC_ALL,'')
+            pesan = f"""\nBerikut adalah detil data NPP <b>{query.npp}</b> divisi {query.div_1}, sesuai update terakhir pada <b>{query.tgl_upload}</b> :\n
+User Pembina : {query.kode_pembina}
+Nama Pembina : {query.nama_pembina}
+Nama Perusahaan : {query.nama_prsh}
+Kepesetaan Awal : {query.keps_awal}
+Kepesertaan JP : {keps_jp}
+Status Aktif : {blthNa}
+Pareto       : {query.pareto}
+Skala Usaha  : {query.skl_usaha}
+Jumlah Program : {query.prog}
+TK Masuk       : {query.tambah_tk}
+TK Keluar      : {query.kurang_tk}
+Total TK Aktif : {query.total_tk_aktif}
+Total TK NA    : {query.total_tk_na}
+Jumlah TK      : {query.jml_all_tk}
+Total Iuran Berjalan : <b>{locale.format(query.total_iuran_berjalan, grouping=True)}</b>
+BLTH Rekon Terakhir : {query.blth_akhir}
+SIPP           : {sipp}
+ITW            : {itw}
+IBR IJT        : {query.ibr_ijt}
+IBR IDM        : {query.ibr_idm}
+
+<i>Sumber : MKRO</i>          
+            """
+            bot.send_message(message.chat.id, pesan)
 
 
 
