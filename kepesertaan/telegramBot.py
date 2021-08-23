@@ -518,7 +518,7 @@ IBR IDM        : {}
 <i>Sumber : MKRO</i>          
             """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
                 keps_jp,blthNa,query.pareto,query.skl_usaha, query.prog,query.tambah_tk,query.kurang_tk,query.total_tk_aktif,
-                    query.total_tk_na,query.jml_all_tk,locale.format(query.total_iuran_berjalan, grouping=True),query.blth_akhir,
+                    query.total_tk_na,query.jml_all_tk,query.total_iuran_berjalan,query.blth_akhir,
                     sipp,itw,query.ibr_ijt,query.ibr_idm)
             bot.send_message(message.chat.id, pesan)
 
