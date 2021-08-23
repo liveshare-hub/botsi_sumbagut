@@ -367,7 +367,7 @@ def infoall(message):
     if qs is None:
         bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
     elif qs.token_auth is None:
-        bot.send_message(message.chat.id,"Authorized User Only!")
+        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
         npp = texts[1]
@@ -453,8 +453,30 @@ SIPP : {}
                 locale.currency(data['totalIuranBerjalan'],grouping=True),data['blthAkhir'],sipp)
                 bot.send_message(message.chat.id, pesan)
 
-@bot.message_handler(commands=['profile'])
 
+# @bot.message_handler(commands=['infoDetil'])
+# def infoDetil(message):
+#     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
+#     if qs is None:
+#         bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+#     elif qs.token_auth is None:
+#         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+#     else:
+#         texts = message.text.split(' ')
+#         npp = texts[1]
+        
+#         if len(texts) < 2:
+#             pesan = """
+# Format anda <b>Salah</b>
+# Gunakan perintah /infoAll no_npp_binaan_anda
+# contoh : /infoAll AA020015
+#         """
+#             bot.send_message(message.chat.id, pesan)
+#         else:
+
+
+
+@bot.message_handler(commands=['profile'])
 def profile(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).exists()
     if not qs:
