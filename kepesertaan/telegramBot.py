@@ -1,9 +1,11 @@
+# from threading import local
 import telebot, locale
 import requests, json
 from datetime import datetime
 from django.conf import settings
 from accounts.models import ExtendUser
 from detil_mkro.models import DetilMkro
+from detil_mkro.rupiah import rupiah_format
 
 from telebot import apihelper
 
@@ -33,7 +35,6 @@ def newRegister(message):
     user = message.chat.id
     
     texts = message.text.split(' ')
-    # print(texts)
     if len(texts) < 2:
         
         bot.send_message(message.chat.id,"Email/Username/Password are missing!")
@@ -98,17 +99,6 @@ def masuk(message):
     else:
         username = texts[1]
         password = texts[2]
-    # print(password)
-    # qs = ExtendUser.objects.filter(username=username, password=password)
-    # print(qs)
-    # if not qs or qs is None:
-#         pesan = """
-# Username/password anda salah.
-# Atau Akun anda belum terdaftar.
-#         """
-    #     bot.send_message(message.chat.id, pesan)
-    # else:
-        # bot.send_message(message.chat.id,"Login Anda Berhasil")
         query = """
 mutation{
   tokenAuth(username:"%s",password:"%s") {
@@ -138,10 +128,6 @@ Berikut perintah yang tersedia :
         """
             obj, created = ExtendUser.objects.update_or_create(username=username, defaults={'token_auth':data['token'], 'id_telegram':message.chat.id})
             bot.send_message(message.chat.id, pesan)
-    # elif data is None:
-    #     bot.send_message(message.chat.id, "Data anda tidak ditemukan. Silahkan Registrasi!")
-    # else:
-    #     bot.send_message(message.chat.id, "Username atau Password anda Salah!")
 
 @bot.message_handler(commands=['token'])
 def authToken(message):
@@ -161,11 +147,7 @@ mutation{
   }
 }
         """ % (kd_token)
-#         headers = {"Authorization":"JWT %s" % (kd_token)}
-        # post_json = requests.post(url, json={'query':query})
-        # json_data = json.loads(post_json.text)
-        # data = json_data['data']['verifyToken']
-        # username = data['payload']['username']
+
         qs = ExtendUser.objects.filter(token_auth=kd_token)
         username = qs[0].username
         if not qs or qs is None:
@@ -381,32 +363,9 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = """
-query{
-  allDetilMkro(npp:"%s",user:"%s"){
-            kodePembina
-            namaPembina
-            npp
-            div1
-            namaPrsh
-            kepsAwal
-            kepsJp
-            blthNa
-            prog
-            totalTkAktif
-            totalIuranBerjalan
-            blthAkhir
-            sipp
-            tglUpload
-        }
-                
-    }    
-            """ % (npp, qs.username)
-            get_json = requests.get(url, json={'query':query})
-            json_data = json.loads(get_json.text)
-            data = json_data['data']['allDetilMkro']
+            query = DetilMkro.objects.filter(kode_pembina=qs.username, npp=npp).first()
             
-            if data is None:
+            if query is None:
                 pesan = """
 Pastikan <b>NPP</> yang anda input adalah benar.
 Dan atau sesuai dengan binaan anda.
@@ -418,23 +377,24 @@ Dan atau sesuai dengan binaan anda.
                 """
                 bot.send_message(message.chat.id, pesan)
             else:
-                data = json_data['data']['allDetilMkro'][0]
-                if data['kepsJp'] == '' or data['kepsJP'] == '- ' or data['kepsJp'] is None:
-                    jp = ' Tidak'
-                else:
-                    jp = data['kepsJp']
-                if data['blthNa'] == '' or data['blthNa'] == '- ' or data['blthNa'] is None:
-                    blth_na = ' Aktif'
-                else:
-                    blth_na = data['blthNa']
-                if data['sipp'] == 1 or data['sipp'] == '1':
-                    sipp = ' Ya'
-                else:
-                    sipp = ' Tidak'
-                tgl = datetime.fromisoformat(data['tglUpload'])
-                tgl2 = datetime.strftime(tgl, '%d-%m-%Y')
-                locale.setlocale(locale.LC_ALL,'')
-                pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+                try:
+                    if query:
+                        if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                            keps_jp = 'Tidak'
+                        else:
+                            keps_jp = query.keps_jp
+                        if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                            blthNa = 'Aktif'
+                        else:
+                            blthNa = 'NA sejak :' + query.blth_na
+                        if query.sipp == 1 or query.sipp == '1':
+                            sipp = 'YA'
+                        else:
+                            sipp = 'TIDAK'
+
+                        locale.setlocale(locale.LC_MONETARY, 'IND')
+                        iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                        pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -447,12 +407,13 @@ Total Iuran Berjalan : <b>{}</b>
 BLTH Rekon Terakhir : {}
 SIPP : {}
 
-<i>Sumber : MKRO</i>
-
-            """.format(data['npp'],data['div1'],tgl2,data['kodePembina'],data['namaPembina'],data['namaPrsh'],
-                data['kepsAwal'],jp,blth_na,data['prog'],locale.format('%d',data['totalTkAktif'],1),
-                locale.currency(data['totalIuranBerjalan'],grouping=True),data['blthAkhir'],sipp)
-                bot.send_message(message.chat.id, pesan)
+<i>Sumber : MKRO</i>          
+                        """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                            keps_jp,blthNa, query.prog,query.total_tk_aktif,iuran_berjalan,query.blth_akhir,sipp)
+                        bot.send_message(message.chat.id, pesan)
+                except:
+                    pesan = "NPP yang dimasukkan tidak benar"
+                    bot.send_message(message.chat.id, pesan)
 
 
 @bot.message_handler(commands=['infoDetil'])
@@ -475,25 +436,40 @@ contoh : /infoAll AA020015
             bot.send_message(message.chat.id, pesan)
         else:
             query = DetilMkro.objects.filter(kode_pembina=qs.username, npp=npp).first()
-            if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
-                keps_jp = 'Tidak'
-            else:
-                keps_jp = query.keps_jp
-            if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
-                blthNa = 'Aktif'
-            else:
-                blthNa = 'NA sejak :' + query.blth_na
-            if query.sipp == 1 or query.sipp == '1':
-                sipp = 'YA'
-            else:
-                sipp = 'TIDAK'
-            if query.itw == 1 or query.itw == '1':
-                itw = 'YA'
-            else:
-                itw = 'TIDAK'
+            if query is None:
+                pesan = """
+Pastikan <b>NPP</> yang anda input adalah benar.
+Dan atau sesuai dengan binaan anda.
 
-            locale.setlocale(locale.LC_ALL,'')
-            pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+
+
+
+<b>**</b><i>botsi sumbagut</i>
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                try:
+                    if query:
+                        if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                            keps_jp = 'Tidak'
+                        else:
+                            keps_jp = query.keps_jp
+                        if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                            blthNa = 'Aktif'
+                        else:
+                            blthNa = 'NA sejak :' + query.blth_na
+                        if query.sipp == 1 or query.sipp == '1':
+                            sipp = 'YA'
+                        else:
+                            sipp = 'TIDAK'
+                        if query.itw == 1 or query.itw == '1':
+                            itw = 'YA'
+                        else:
+                            itw = 'TIDAK'
+
+                        locale.setlocale(locale.LC_MONETARY, 'IND')
+                        iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                        pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -516,11 +492,14 @@ IBR IJT        : {}
 IBR IDM        : {}
 
 <i>Sumber : MKRO</i>          
-            """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
-                keps_jp,blthNa,query.pareto,query.skl_usaha, query.prog,query.tambah_tk,query.kurang_tk,query.total_tk_aktif,
-                    query.total_tk_na,query.jml_all_tk,query.total_iuran_berjalan,query.blth_akhir,
-                    sipp,itw,query.ibr_ijt,query.ibr_idm)
-            bot.send_message(message.chat.id, pesan)
+                        """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                            keps_jp,blthNa,query.pareto,query.skl_usaha, query.prog,query.tambah_tk,query.kurang_tk,query.total_tk_aktif,
+                                query.total_tk_na,query.jml_all_tk,iuran_berjalan,query.blth_akhir,
+                                sipp,itw,query.ibr_ijt,query.ibr_idm)
+                        bot.send_message(message.chat.id, pesan)
+                except AttributeError as ex:
+                    pesan = "NPP yang dimasukkan tidak benar. Error: {}".format(ex)
+                    bot.send_message(message.chat.id, pesan)
 
 
 
