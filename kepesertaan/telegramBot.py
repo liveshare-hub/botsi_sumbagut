@@ -364,6 +364,7 @@ contoh : /infoAll AA020015
             bot.send_message(message.chat.id, pesan)
         else:
             query = DetilMkro.objects.filter(kode_pembina=qs.username, npp=npp).first()
+            print(query)
             
             if query is None:
                 pesan = """
@@ -392,7 +393,7 @@ Dan atau sesuai dengan binaan anda.
                     else:
                         sipp = 'TIDAK'
 
-                    locale.setlocale(locale.LC_MONETARY, 'IND')
+                    locale.setlocale(locale.LC_MONETARY, 'id_ID')
                     iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
                     pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
