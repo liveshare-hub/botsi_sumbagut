@@ -10,3 +10,9 @@ def generateUniqueCode():
     data = hashlib.md5(data).hexdigest()
 
     return data
+
+def listTostring(s):
+    str1 = ""
+    for ele in s:
+        str1 += ele
+    return str1

@@ -554,41 +554,41 @@ Kantor  : {}
         bot.send_message(message.chat.id, pesan)
 
 
-@bot.message_handler(commands=['REKAPBPUREKON'])
-def rekapbpurekon(message):
-    qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
-    if qs is None:
-        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
-    elif qs.token_auth is None:
-        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
-    else:
-        texts = message.text.split(' ')
-        if len(texts) < 2:
-            pesan = """
-Format anda <b>Salah</b>
-Gunakan perintah /infoAll no_npp_binaan_anda
-contoh : /infoAll AA020015
-            """
-            bot.send_message(message.chat.id, pesan)
-        else:
-            query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1].texts[2]))
-            if not query.exists:
-                pesan = """
-Data tidak ditemukan / belum diupdate
-                """
-                bot.send_message(message.chat.id, pesan)
-            else:
-                for i in query:
-                    tgl_rekon = i.blth_siap_rekon
-                    pesan = """
-Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
-<=12-2019 : 
-<=12-2020 :
+# @bot.message_handler(commands=['REKAPBPUREKON'])
+# def rekapbpurekon(message):
+#     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
+#     if qs is None:
+#         bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+#     elif qs.token_auth is None:
+#         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+#     else:
+#         texts = message.text.split(' ')
+#         if len(texts) < 2:
+#             pesan = """
+# Format anda <b>Salah</b>
+# Gunakan perintah /infoAll no_npp_binaan_anda
+# contoh : /infoAll AA020015
+#             """
+#             bot.send_message(message.chat.id, pesan)
+#         else:
+#             query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1].texts[2]))
+#             if not query.exists:
+#                 pesan = """
+# Data tidak ditemukan / belum diupdate
+#                 """
+#                 bot.send_message(message.chat.id, pesan)
+#             else:
+#                 for i in query:
+#                     tgl_rekon = i.blth_siap_rekon
+#                     pesan = """
+# Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
+# <=12-2019 : 
+# <=12-2020 :
 
 
-Sumber : MKRO
+# Sumber : MKRO
 
-                    """
+#                     """
 
 print('Bot is Running')
 bot.polling()
