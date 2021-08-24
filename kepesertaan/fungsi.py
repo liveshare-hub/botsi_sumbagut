@@ -12,7 +12,6 @@ def generateUniqueCode():
     return data
 
 def listTostring(s):
-    str1 = ""
-    for ele in s:
-        str1 += ele
-    return str1
+    str1 = " "
+    
+    return (str1.join(s))
