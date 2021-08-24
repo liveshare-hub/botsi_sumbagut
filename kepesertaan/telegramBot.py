@@ -73,7 +73,7 @@ errors
 Akun <b>{}</b> sudah berhasil didaftarkan.
 Berikut token anda :
 
-{}
+<pre>{}</pre>
 
 Kemudian verifikasi dengan cara:
 /token token_anda
@@ -378,23 +378,23 @@ Dan atau sesuai dengan binaan anda.
                 bot.send_message(message.chat.id, pesan)
             else:
                 try:
-                    if query:
-                        if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
-                            keps_jp = 'Tidak'
-                        else:
-                            keps_jp = query.keps_jp
-                        if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
-                            blthNa = 'Aktif'
-                        else:
-                            blthNa = 'NA sejak :' + query.blth_na
-                        if query.sipp == 1 or query.sipp == '1':
-                            sipp = 'YA'
-                        else:
-                            sipp = 'TIDAK'
+                    
+                    if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                        keps_jp = 'Tidak'
+                    else:
+                        keps_jp = query.keps_jp
+                    if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                        blthNa = 'Aktif'
+                    else:
+                        blthNa = 'NA sejak :' + query.blth_na
+                    if query.sipp == 1 or query.sipp == '1':
+                        sipp = 'YA'
+                    else:
+                        sipp = 'TIDAK'
 
-                        locale.setlocale(locale.LC_MONETARY, 'IND')
-                        iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
-                        pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+                    locale.setlocale(locale.LC_MONETARY, 'IND')
+                    iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                    pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -408,9 +408,9 @@ BLTH Rekon Terakhir : {}
 SIPP : {}
 
 <i>Sumber : MKRO</i>          
-                        """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
-                            keps_jp,blthNa, query.prog,query.total_tk_aktif,iuran_berjalan,query.blth_akhir,sipp)
-                        bot.send_message(message.chat.id, pesan)
+                    """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                        keps_jp,blthNa, query.prog,query.total_tk_aktif,iuran_berjalan,query.blth_akhir,sipp)
+                    bot.send_message(message.chat.id, pesan)
                 except:
                     pesan = "NPP yang dimasukkan tidak benar"
                     bot.send_message(message.chat.id, pesan)
@@ -551,6 +551,43 @@ Kantor  : {}
 <b>**</b><i>botsi sumbagut</i>
         """.format(user, message.chat.first_name, jabatan, bidang, kantor)
         bot.send_message(message.chat.id, pesan)
+
+
+@bot.message_handler(commands=['REKAPBPUREKON'])
+def rekapbpurekon(message):
+    qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
+    if qs is None:
+        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+    elif qs.token_auth is None:
+        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+    else:
+        texts = message.text.split(' ')
+        if len(texts) < 2:
+            pesan = """
+Format anda <b>Salah</b>
+Gunakan perintah /infoAll no_npp_binaan_anda
+contoh : /infoAll AA020015
+            """
+            bot.send_message(message.chat.id, pesan)
+        else:
+            query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1].texts[2]))
+            if not query.exists:
+                pesan = """
+Data tidak ditemukan / belum diupdate
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                for i in query:
+                    tgl_rekon = i.blth_siap_rekon
+                    pesan = """
+Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
+<=12-2019 : 
+<=12-2020 :
+
+
+Sumber : MKRO
+
+                    """
 
 print('Bot is Running')
 bot.polling()
