@@ -19,7 +19,7 @@ def sendNotif():
     qs = DetilMkro.objects.all()
     for user in users:
         datas = qs.filter(tgl_upload__range=(yt,today))
-        locale.setlocale(locale.LC_ALL,'')
+        locale.setlocale(locale.LC_MONETARY,'id_ID')
         if datas.exists():
             for data in datas:
                 if data.keps_jp == '' or data.keps_jp == '- ' or data.keps_jp is None:
