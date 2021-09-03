@@ -554,7 +554,7 @@ Kantor  : {}
         bot.send_message(message.chat.id, pesan)
 
 
-@bot.message_handler(commands=['REKAPBPUREKON'])
+@bot.message_handler(commands=['REKAPBUREKON'])
 def rekapbpurekon(message):
     m = []
     n = []
@@ -573,7 +573,7 @@ contoh : /infoAll AA020015
             """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1].texts[2]))
+            query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1],texts[2]))
             if not query.exists:
                 pesan = """
 Data tidak ditemukan / belum diupdate
