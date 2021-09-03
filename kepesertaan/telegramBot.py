@@ -584,6 +584,7 @@ Data tidak ditemukan / belum diupdate
                     nilai_rekon = i.nilai_posting
                     m.append(i.blth_siap_rekon)
                     n.append(nilai_rekon)
+                m.extend(n)
                 pesan = """
 Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
 <=12-2019 : 
@@ -603,8 +604,7 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
 
 Sumber : MKRO
 
-                """.format(m[0],n[0],m[1],n[1],m[2],n[2],m[3],n[3],m[4],n[4],m[5],n[5],m[6],n[6],
-                    m[7],n[7],m[8],n[8],m[9],n[9],m[10],n[10],m[11],n[11])
+                """.format(m[x] for x in range(0,len(m)))
                 bot.send_message(message.chat.id,pesan)
 
 print('Bot is Running')
