@@ -604,7 +604,7 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
 
 Sumber : MKRO
 
-                """.format(m[x] for x in range(0,len(m)))
+                """.format(m[x] for x in range(0,len(m)+1))
                 bot.send_message(message.chat.id,pesan)
 
 print('Bot is Running')
