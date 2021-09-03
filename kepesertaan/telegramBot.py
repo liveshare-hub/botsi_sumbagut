@@ -554,41 +554,58 @@ Kantor  : {}
         bot.send_message(message.chat.id, pesan)
 
 
-# @bot.message_handler(commands=['REKAPBPUREKON'])
-# def rekapbpurekon(message):
-#     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
-#     if qs is None:
-#         bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
-#     elif qs.token_auth is None:
-#         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
-#     else:
-#         texts = message.text.split(' ')
-#         if len(texts) < 2:
-#             pesan = """
-# Format anda <b>Salah</b>
-# Gunakan perintah /infoAll no_npp_binaan_anda
-# contoh : /infoAll AA020015
-#             """
-#             bot.send_message(message.chat.id, pesan)
-#         else:
-#             query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1].texts[2]))
-#             if not query.exists:
-#                 pesan = """
-# Data tidak ditemukan / belum diupdate
-#                 """
-#                 bot.send_message(message.chat.id, pesan)
-#             else:
-#                 for i in query:
-#                     tgl_rekon = i.blth_siap_rekon
-#                     pesan = """
-# Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
-# <=12-2019 : 
-# <=12-2020 :
+@bot.message_handler(commands=['REKAPBPUREKON'])
+def rekapbpurekon(message):
+    m = []
+    n = []
+    qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
+    if qs is None:
+        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+    elif qs.token_auth is None:
+        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+    else:
+        texts = message.text.split(' ')
+        if len(texts) < 2:
+            pesan = """
+Format anda <b>Salah</b>
+Gunakan perintah /infoAll no_npp_binaan_anda
+contoh : /infoAll AA020015
+            """
+            bot.send_message(message.chat.id, pesan)
+        else:
+            query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1].texts[2]))
+            if not query.exists:
+                pesan = """
+Data tidak ditemukan / belum diupdate
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                for i in query:
+                    nilai_rekon = i.nilai_posting
+                    m.append(i.blth_siap_rekon)
+                    n.append(nilai_rekon)
+                pesan = """
+Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
+<=12-2019 : 
+<=12-2020 :
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
+{} : {}
 
+Sumber : MKRO
 
-# Sumber : MKRO
-
-#                     """
+                """.format(m[0],n[0],m[1],n[1],m[2],n[2],m[3],n[3],m[4],n[4],m[5],n[5],m[6],n[6],
+                    m[7],n[7],m[8],n[8],m[9],n[9],m[10],n[10],m[11],n[11])
+                bot.send_message(message.chat.id,pesan)
 
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
