@@ -650,7 +650,7 @@ contoh : /REKAPBU 2021
             locale.setlocale(locale.LC_MONETARY, 'id_ID')
             for i in range(0, len(m)-1):
                 try:
-                    query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon__contains=m[i])
+                    query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon=m[i])
                     if not query.exists():
                         pass
                     else:
@@ -667,7 +667,7 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</
             for k in range(2,0,-1):
                 thn = tahun - (k)
                 try:
-                    query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon__contains=str(thn))
+                    query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon=str(thn))
                     if not query.exists():
                         pass
                     else:
