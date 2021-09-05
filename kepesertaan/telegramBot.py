@@ -1,4 +1,6 @@
 # from threading import local
+from django.db.models.aggregates import Sum
+from django.db.models import Q
 import telebot, locale
 import requests, json
 from datetime import datetime
@@ -199,6 +201,14 @@ Menampilakn Profile Akun:
 Menampilkan report MKRO by NPP per pembina:
 /infoAll npp_binaan_anda
 contoh /infoAll AA020015
+
+Menampilkan report detil NPP per pembina:
+/infoDetil npp
+contoh : /infoDetil AA020015
+
+Menampilkan report Rekon pertahun bulan berjalan per pembina:
+/REKAPBUREKON tahun
+contoh : /REKAPBUREKON 2021
 
 Terima Kasih
         """
@@ -565,47 +575,121 @@ def rekapbpurekon(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 2:
+        if len(texts) < 1:
             pesan = """
 Format anda <b>Salah</b>
-Gunakan perintah /infoAll no_npp_binaan_anda
-contoh : /infoAll AA020015
+Gunakan perintah /REKAPBUREKON tahun
+contoh : /REKAPBUREKON 2021
             """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__range=(texts[1],texts[2]))
-            if not query.exists:
-                pesan = """
-Data tidak ditemukan / belum diupdate
-                """
-                bot.send_message(message.chat.id, pesan)
-            else:
-                for i in query:
-                    nilai_rekon = i.nilai_posting
-                    m.append(i.blth_siap_rekon)
-                    n.append(nilai_rekon)
-                m.extend(n)
-                pesan = """
+            m = ['01-'+texts[1],'02-'+texts[1],'03-'+texts[1], '04-'+texts[1],'05-'+texts[1],'06-'+texts[1],'07'+texts[1],
+                  '08-'+texts[1],'09-'+texts[1],'10-'+texts[1],'11-'+texts[1],'12-'+texts[1]]
+            locale.setlocale(locale.LC_MONETARY, 'id_ID')
+            for i in range(0,len(m)-1):
+                try:
+                    query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__contains=m[i])
+                    
+                    if not query.exists():
+                        pass
+                    else:
+                # for i in query:
+                #     nilai_rekon = i.nilai_posting
+                    # msg = "{} : {}".format(i.blth_siap_rekon, nilai_rekon)
+                    # m = '\n'.join(msg)
+                        total = query.aggregate(Sum('nilai_posting'))
+                        msg = "{} : {}".format(m[i],locale.currency(total['nilai_posting__sum'], grouping=True))
+                        n.append(msg)
+                except:
+                    pass
+            pesan = """
 Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
-<=12-2019 : 
-<=12-2020 :
+            """.format(qs.username)
+            bot.send_message(message.chat.id, pesan)
+            tahun = int(texts[1])
+            for k in range(2,0,-1):
+                thn = tahun - (k)
+                query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__contains=str(thn))
+                total1 = query.aggregate(Sum('nilai_posting'))
+                pesan = """
 {} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
-{} : {}
+                """.format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
+                bot.send_message(message.chat.id, pesan)
+            for j in range(0,len(n)-1):
+                pesan = """
+{}
+                """.format(n[j])
+                bot.send_message(message.chat.id, pesan)
+                    
 
-Sumber : MKRO
+@bot.message_handler(commands=['REKAPBU'])
+def rekapbu(message):
+    m = []
+    n = []
+    qs = ExtendUser.objects.filter(Q(jabatan__id=3) | Q(jabatan__id=4),id_telegram=message.chat.id).first()
+    if qs is None:
+        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+    elif qs.token_auth is None:
+        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+    else:
+        texts = message.text.split(' ')
+        if len(texts) < 1:
+            pesan = """
+Format anda <b>Salah</b>
+Gunakan perintah /REKAPBU tahun
+contoh : /REKAPBU 2021
 
-                """.format(m[x] for x in range(0,len(m)+1))
-                bot.send_message(message.chat.id,pesan)
+
+
+<i>Khusus Kakacab / Kabid</i>
+            """
+            bot.send_message(message.chat.id, pesan)
+        else:
+            m = ['01-'+texts[1],'02-'+texts[1],'03-'+texts[1], '04-'+texts[1],'05-'+texts[1],'06-'+texts[1],'07'+texts[1],
+                  '08-'+texts[1],'09-'+texts[1],'10-'+texts[1],'11-'+texts[1],'12-'+texts[1]]
+            locale.setlocale(locale.LC_MONETARY, 'id_ID')
+            for i in range(0, len(m)-1):
+                try:
+                    query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon__contains=m[i])
+                    if not query.exists():
+                        pass
+                    else:
+                        total = query.aggregate(Sum('nilai_posting'))
+                        msg = "{} : {}".format(m[i],locale.currency(total['nilai_posting__sum'], grouping=True))
+                        n.append(msg)
+                except:
+                    pass
+        pesan = """
+Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</b>
+            """.format(qs.kd_kantor)
+        bot.send_message(message.chat.id, pesan)
+        tahun = int(texts[1])
+        for k in range(2,0,-1):
+            thn = tahun - (k)
+            try:
+                query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon__contains=str(thn))
+                if not query.exists():
+                    pass
+                else:
+                    total1 = query.aggregate(Sum('nilai_posting'))
+                    pesan = """
+{} : {}
+                    """.format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
+                    bot.send_message(message.chat.id, pesan)
+            except:
+                pass
+        for j in range(0,len(n)-1):
+            pesan = """
+{}
+            """.format(n[j])
+            bot.send_message(message.chat.id, pesan)
+        pesan = """
+
+
+
+<i>Sumber MKRO</i>
+        """
+        bot.send_message(message.chat.id, pesan)
 
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
