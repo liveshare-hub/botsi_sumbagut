@@ -215,6 +215,9 @@ Menampilkan report Rekon pertahun bulan berjalan per Cabang:
 contoh : /REKAPBU 2021
 <i>**Untuk Kepala/Kabid</i>
 
+Menampilkan report Rekap Skala Badan Usaha Percabang dan atau Perpembina:
+/REKAPBUSKALA
+
 Terima Kasih
         """
         bot.send_message(message.chat.id, pesan)
@@ -705,11 +708,11 @@ def rekapbuSkala(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 1:
+        if len(texts) > 1 and texts[0] != "REKAPBUSKALA" :
             pesan = """
 Format anda <b>Salah</b>
-Gunakan perintah /REKAPBU tahun
-contoh : /REKAPBUSKALA 2021
+Gunakan perintah /REKAPBUSKALA
+contoh : /REKAPBUSKALA
             """
             bot.send_message(message.chat.id, pesan)
         else:
