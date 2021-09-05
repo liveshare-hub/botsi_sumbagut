@@ -1,11 +1,11 @@
 # from threading import local
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Count, Sum
 from django.db.models import Q
 import telebot, locale
 import requests, json
 from datetime import datetime
 from django.conf import settings
-from accounts.models import ExtendUser
+from accounts.models import ExtendUser, kode_kantor
 from detil_mkro.models import DetilMkro
 from detil_mkro.rupiah import rupiah_format
 
@@ -209,6 +209,11 @@ contoh : /infoDetil AA020015
 Menampilkan report Rekon pertahun bulan berjalan per pembina:
 /REKAPBUREKON tahun
 contoh : /REKAPBUREKON 2021
+
+Menampilkan report Rekon pertahun bulan berjalan per Cabang:
+/REKAPBU tahun
+contoh : /REKAPBU 2021
+<i>**Untuk Kepala/Kabid</i>
 
 Terima Kasih
         """
@@ -690,6 +695,61 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</
 <i>Sumber MKRO</i>
             """
             bot.send_message(message.chat.id, pesan)
+
+bot.message_handler(commands=['REKAPBUSKALA'])
+def rekapbuSkala(message):
+    qs = ExtendUser.objects.filter(id_telegram=message.chat.id)
+    if qs.first() is None:
+        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+    elif qs[0].token_auth is None:
+        bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
+    else:
+        texts = message.text.split(' ')
+        if len(texts) < 1:
+            pesan = """
+Format anda <b>Salah</b>
+Gunakan perintah /REKAPBU tahun
+contoh : /REKAPBUSKALA 2021
+            """
+            bot.send_message(message.chat.id, pesan)
+        else:
+            if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
+                try:
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('skl_usaha').annotate(jlh=Count('skl_usaha'))
+                    pesan = """
+Berikut adalah rekap PK/BU berdasarkan Skala Usaha Kantor Cabang {} :
+Besar : {}
+Menengah : {} 
+Kecil : {}
+Mikro : {}
+
+
+<i>**Sumber : MKRO</i>
+
+                    """.format(qs[0].kd_kantor, query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                    bot.send_message(message.chat.id, pesan)
+                except:
+                    bot.send_message(message.chat.id, "Data tidak ditemukan!")
+            else:
+                try:
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('skl_usaha').annotate(jlh=Count('skl_usaha'))
+                    pesan = """
+Berikut adalah rekap PK/BU berdasarkan Skala Usaha
+Kantor Cabang {} dengan pembina {} :
+
+Besar : {}
+Menengah : {} 
+Kecil : {}
+Mikro : {}
+
+
+
+
+<i>**Sumber : MKRO</i>
+                    """.format(qs[0].kd_kantor, qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                    bot.send_message(message.chat.id, pesan)
+                except:
+                    bot.send_message(message.chat.id, "Data tidak ditemukan!")
 
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
