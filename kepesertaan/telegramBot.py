@@ -659,37 +659,37 @@ contoh : /REKAPBU 2021
                         n.append(msg)
                 except:
                     pass
-        pesan = """
+            pesan = """
 Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</b>
             """.format(qs.kd_kantor)
-        bot.send_message(message.chat.id, pesan)
-        tahun = int(texts[1])
-        for k in range(2,0,-1):
-            thn = tahun - (k)
-            try:
-                query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon__contains=str(thn))
-                if not query.exists():
-                    pass
-                else:
-                    total1 = query.aggregate(Sum('nilai_posting'))
-                    pesan = """
-{} : {}
-                    """.format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
-                    bot.send_message(message.chat.id, pesan)
-            except:
-                pass
-        for j in range(0,len(n)-1):
-            pesan = """
-{}
-            """.format(n[j])
             bot.send_message(message.chat.id, pesan)
-        pesan = """
+            tahun = int(texts[1])
+            for k in range(2,0,-1):
+                thn = tahun - (k)
+                try:
+                    query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, blth_siap_rekon__contains=str(thn))
+                    if not query.exists():
+                        pass
+                    else:
+                        total1 = query.aggregate(Sum('nilai_posting'))
+                        pesan = """
+{} : {}
+                        """.format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
+                        bot.send_message(message.chat.id, pesan)
+                except:
+                    pass
+            for j in range(0,len(n)-1):
+                pesan = """
+{}
+                """.format(n[j])
+                bot.send_message(message.chat.id, pesan)
+            pesan = """
 
 
 
 <i>Sumber MKRO</i>
-        """
-        bot.send_message(message.chat.id, pesan)
+            """
+            bot.send_message(message.chat.id, pesan)
 
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
