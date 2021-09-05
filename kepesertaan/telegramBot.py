@@ -707,8 +707,9 @@ def rekapbuSkala(message):
     elif qs[0].token_auth is None:
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
-        texts = message.text.split(' ')
-        if len(texts) > 1 and texts[0] != "REKAPBUSKALA" :
+        texts = message.text
+        print(texts)
+        if texts != "REKAPBUSKALA":
             pesan = """
 Format anda <b>Salah</b>
 Gunakan perintah /REKAPBUSKALA
