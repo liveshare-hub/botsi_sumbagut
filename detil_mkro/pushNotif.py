@@ -70,22 +70,3 @@ SIPP : {}
 
                 response = requests.request("POST", url, json=payload, headers=headers)
                 print(response.text)
-        else:
-            pesan = """
-<code>Data tidak terupdate</code>
-            """
-            payload = {
-                "text":pesan,
-                "parse_mode": "HTML",
-                "disable_web_page_preview": False,
-                "disable_notification": False,
-                "chat_id": str(user.id_telegram)
-            }
-            headers = {
-                "Accept": "application/json",
-                "User-Agent": "Telegram Bot SDK - (https://github.com/irazasyed/telegram-bot-sdk)",
-                "Content-Type": "application/json"
-            }
-
-            response = requests.request("POST", url, json=payload, headers=headers)
-            print(response.text)
