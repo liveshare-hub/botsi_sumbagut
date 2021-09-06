@@ -789,7 +789,7 @@ Mikro : {}
                 if query.exists():
                     pesan = """
 Berikut adalah rekap PK/BU berdasarkan Skala Usaha
-Kantor Cabang {} dengan pembina {} :
+Binaan {} :
 
 Besar : {}
 Menengah : {} 
@@ -800,7 +800,7 @@ Mikro : {}
 
 
 <i>**Sumber : MKRO</i>
-                    """.format(qs[0].kd_kantor, qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                    """.format(qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
                     bot.send_message(message.chat.id, pesan)
                 else:
                     bot.send_message(message.chat.id, "Data Tidak Ditemukan")
