@@ -763,7 +763,16 @@ def rekapProg(message):
     elif qs[0].token_auth is None:
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
-        if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
+        texts = message.text
+        if texts != 'REKAPBUPROG':
+            pesan = """
+Format anda <b>Salah</b>
+Gunakan perintah /REKAPBUSKALA
+contoh : /REKAPBUSKALA
+            """
+            bot.send_message(message.chat.id, pesan)
+        else:
+            if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
                 try:
                     query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('prog').annotate(jlh=Count('prog'))
                     if query.exists():
@@ -783,11 +792,11 @@ Mikro : {}
                         bot.send_message(message.chat.id,"Data Tidak Ditemukan")
                 except:
                     bot.send_message(message.chat.id, "Otoritas tidak cukup! Hanya untuk Kakacab dan Kabid")
-        else:
-            try:
-                query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('prog'))
-                if query.exists():
-                    pesan = """
+            else:
+                try:
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('prog'))
+                    if query.exists():
+                        pesan = """
 Berikut adalah rekap PK/BU berdasarkan Skala Usaha
 Binaan {} :
 
@@ -800,12 +809,12 @@ Mikro : {}
 
 
 <i>**Sumber : MKRO</i>
-                    """.format(qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
-                    bot.send_message(message.chat.id, pesan)
-                else:
-                    bot.send_message(message.chat.id, "Data Tidak Ditemukan")
-            except:
-                bot.send_message(message.chat.id, "Otoritas tidak sesuai!")
+                        """.format(qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                        bot.send_message(message.chat.id, pesan)
+                    else:
+                     bot.send_message(message.chat.id, "Data Tidak Ditemukan")
+                except:
+                    bot.send_message(message.chat.id, "Otoritas tidak sesuai!")
 
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
