@@ -699,7 +699,7 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</
             """
             bot.send_message(message.chat.id, pesan)
 
-bot.message_handler(commands=['REKAPBUSKALA'])
+@bot.message_handler(commands=['REKAPBUSKALA'])
 def rekapbuSkala(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id)
     if qs.first() is None:
