@@ -774,19 +774,22 @@ def rekapProg(message):
 #         else:
         if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
             try:
+                
                 query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('prog').annotate(jlh=Count('prog'))
+                
                 if query.exists():
                     pesan = """
-Berikut adalah rekap PK/BU berdasarkan Skala Usaha Kantor Cabang {} :
-Besar : {}
-Menengah : {} 
-Kecil : {}
-Mikro : {}
+Berikut adalah rekap PK/BU berdasarkan Program Kantor Cabang {} :
+
+4P : {}
+3P : {} 
+2P : {}
+
 
 
 <i>**Sumber : MKRO</i>
 
-                    """.format(qs[0].kd_kantor, query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                    """.format(qs[0].kd_kantor,query[0]['jlh'],query[1]['jlh'],query[2]['jlh'])
                     bot.send_message(message.chat.id, pesan)
                 else:
                         bot.send_message(message.chat.id,"Data Tidak Ditemukan")
@@ -797,7 +800,7 @@ Mikro : {}
                 query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('prog'))
                 if query.exists():
                         pesan = """
-Berikut adalah rekap PK/BU berdasarkan Skala Usaha
+Berikut adalah rekap PK/BU berdasarkan Program Kepesertaan
 Binaan {} :
 
 Besar : {}
@@ -809,7 +812,7 @@ Mikro : {}
 
 
 <i>**Sumber : MKRO</i>
-                        """.format(qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                        """.format(qs[0].username,query[0]['jlh'],query[1]['jlh'],query[2]['jlh'])
                         bot.send_message(message.chat.id, pesan)
                 else:
                      bot.send_message(message.chat.id, "Data Tidak Ditemukan")
