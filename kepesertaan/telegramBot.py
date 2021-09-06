@@ -211,12 +211,19 @@ Menampilkan report Rekon pertahun bulan berjalan per pembina:
 contoh : /REKAPBUREKON 2021
 
 Menampilkan report Rekon pertahun bulan berjalan per Cabang:
+
 /REKAPBU tahun
 contoh : /REKAPBU 2021
 <i>**Untuk Kepala/Kabid</i>
 
 Menampilkan report Rekap Skala Badan Usaha Percabang dan atau Perpembina:
+
 /REKAPBUSKALA
+
+Menampilkan report Rekap Program Kepesertaan Badan Usaha Percabang dan atau Per Pembina:
+
+/REKAPBUPROG
+
 
 Terima Kasih
         """
