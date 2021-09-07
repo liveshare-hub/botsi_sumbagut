@@ -643,7 +643,7 @@ def rekapbu(message):
     n = []
     qs = ExtendUser.objects.filter(Q(jabatan__id=3) | Q(jabatan__id=4),id_telegram=message.chat.id).first()
     if qs is None:
-        bot.send_message(message.chat.id, "Akun anda belum diupdate/belum terdaftar")
+        bot.send_message(message.chat.id, "Otoritas tidak cukup")
     elif qs.token_auth is None:
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
