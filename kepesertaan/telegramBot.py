@@ -67,7 +67,7 @@ errors
         # print(json_data)
             if post_json.status_code == 200:
                 try:
-                    qs = ExtendUser.objects.filter(username=username)[0]
+                    qs = ExtendUser.objects.filter(username=username)
                     token = qs.token_auth
             # cek = qs.filter(username=username)[0]
                     data = json_data['data']['register']
