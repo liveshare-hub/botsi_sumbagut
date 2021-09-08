@@ -596,7 +596,7 @@ def rekapbpurekon(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 1:
+        if len(texts) < 1 and len(texts[1]) != 4:
             pesan = """
 Format anda <b>Salah</b>
 Gunakan perintah /REKAPBUREKON tahun
@@ -654,7 +654,7 @@ def rekapbu(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 1 and len(texts[0]) > 4:
+        if len(texts) < 1 and len(texts[1]) != 4:
             pesan = """
 Format anda <b>Salah</b>
 Gunakan perintah /REKAPBU tahun
