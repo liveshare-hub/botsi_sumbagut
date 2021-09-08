@@ -64,15 +64,15 @@ errors
 
             post_json = requests.post(url, json={'query':query})
             json_data = json.loads(post_json.text)
-        # print(json_data)
+            print(json_data)
             if post_json.status_code == 200:
-                try:
-                    qs = ExtendUser.objects.filter(username=username)
-                    token = qs.token_auth
-            # cek = qs.filter(username=username)[0]
-                    data = json_data['data']['register']
-                    if data['success'] == True:
-                        pesan = """
+                
+                qs = ExtendUser.objects.filter(username=username)[0]
+                token = qs.token_auth
+        
+                data = json_data['data']['register']
+                if data['success'] == True:
+                    pesan = """
 Akun <b>{}</b> sudah berhasil didaftarkan.
 Berikut token anda :
 
@@ -81,11 +81,11 @@ Berikut token anda :
 Kemudian verifikasi dengan cara:
 /token token_anda
 Terima Kasih
-                        """.format(username, token)
-            # print(json_data)
-                        bot.send_message(user, pesan)
-                except:
-                        bot.send_message(message.chat.id, "user anda belum terdaftar")
+                    """.format(username, token)
+
+                    bot.send_message(user, pesan)
+                else: 
+                    bot.send_message(message.chat.id, "user anda belum terdaftar")
             
         
 
@@ -119,13 +119,14 @@ mutation{
         data = json_data['data']['tokenAuth']
         if data['success'] == True:
             pesan = """
-Anda berhasil login.
+Anda sudah berhasil Login!.
+Silahkan anda melakukan update akun
+dengan cara:
+/update <b>username id_bidang id_jabatan id_kantor</b>
 
-Berikut perintah yang tersedia :
-1. Cek Detail NPP Binaan
-   contoh : /infoAll AA020015
+contoh : /update MU150710 1 1 1
 
-2. On progress
+<i>**cek menu /help untuk melihat id masing-masing di atas</i>
 
 
         """
@@ -389,8 +390,8 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = DetilMkro.objects.filter(kode_pembina=qs.username, npp=npp).first()
-            print(query)
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            # print(query)
             
             if query is None:
                 pesan = """
@@ -462,7 +463,7 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = DetilMkro.objects.filter(kode_pembina=qs.username, npp=npp).first()
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
             if query is None:
                 pesan = """
 Pastikan <b>NPP</> yang anda input adalah benar.
@@ -559,6 +560,7 @@ query{
         """ % (telegram)
         get_json = requests.get(url, json={'query':query})
         json_data = json.loads(get_json.text)
+        print(json_data)
         data = json_data['data']['detilUserId'][0]
         user = data['username']
         kantor = data['kdKantor']['kdKantor']+' - '+data['kdKantor']['namaKantor']
