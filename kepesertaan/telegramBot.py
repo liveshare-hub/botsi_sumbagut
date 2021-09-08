@@ -519,6 +519,9 @@ ITW            : {}
 IBR IJT        : {}
 IBR IDM        : {}
 
+
+
+
 <i>Sumber : MKRO</i>          
                         """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
                             keps_jp,blthNa,query.pareto,query.skl_usaha, query.prog,query.tambah_tk,query.kurang_tk,query.total_tk_aktif,
@@ -651,7 +654,7 @@ def rekapbu(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 1:
+        if len(texts) < 1 and len(texts[0]) > 4:
             pesan = """
 Format anda <b>Salah</b>
 Gunakan perintah /REKAPBU tahun
