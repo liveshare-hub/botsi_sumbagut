@@ -382,10 +382,10 @@ def infoall(message):
         texts = message.text.split(' ')
         npp = texts[1]
         
-        if len(texts) < 2:
+        if len(texts) < 2 or len(npp) != 8:
             pesan = """
 Format anda <b>Salah</b>
-Gunakan perintah /infoAll no_npp_binaan_anda
+Gunakan perintah /infoAll no_npp
 contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
@@ -396,9 +396,6 @@ contoh : /infoAll AA020015
             if query is None:
                 pesan = """
 Pastikan <b>NPP</> yang anda input adalah benar.
-Dan atau sesuai dengan binaan anda.
-
-
 
 
 <b>**</b><i>botsi sumbagut</i>
@@ -455,10 +452,10 @@ def infoDetil(message):
         texts = message.text.split(' ')
         npp = texts[1]
         
-        if len(texts) < 2:
+        if len(texts) < 2 or len(npp) != 8:
             pesan = """
 Format anda <b>Salah</b>
-Gunakan perintah /infoAll no_npp_binaan_anda
+Gunakan perintah /infoAll no_npp
 contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
@@ -467,8 +464,6 @@ contoh : /infoAll AA020015
             if query is None:
                 pesan = """
 Pastikan <b>NPP</> yang anda input adalah benar.
-Dan atau sesuai dengan binaan anda.
-
 
 
 
@@ -596,7 +591,7 @@ def rekapbpurekon(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 1 and len(texts[1]) != 4:
+        if len(texts) < 1 or len(texts[1]) != 4:
             pesan = """
 Format anda <b>Salah</b>
 Gunakan perintah /REKAPBUREKON tahun
@@ -654,7 +649,8 @@ def rekapbu(message):
         bot.send_message(message.chat.id,"Authorized User Only! Silahkan Update Akun Anda")
     else:
         texts = message.text.split(' ')
-        if len(texts) < 1 and len(texts[1]) != 4:
+        
+        if len(texts) < 1 or len(texts[1]) != 4:
             pesan = """
 Format anda <b>Salah</b>
 Gunakan perintah /REKAPBU tahun
