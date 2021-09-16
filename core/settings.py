@@ -95,6 +95,7 @@ DATABASES = {
         'PASSWORD':config('DB_PASSWORD2'),
         'HOST':config('DB_HOST'),
         'PORT':config('DB_PORT'),
+        'CONN_MAX_AGE': 3600,
     },
     'primary':{
         'ENGINE':'django.db.backends.mysql',
@@ -103,6 +104,7 @@ DATABASES = {
         'PASSWORD':config('DB_PASSWORD2'),
         'HOST':config('DB_HOST'),
         'PORT':config('DB_PORT'),
+        'CONN_MAX_AGE':3600,
     }
 }
 
