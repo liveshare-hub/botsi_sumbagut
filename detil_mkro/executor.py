@@ -30,6 +30,7 @@ def mulai():
     #days_of_week = 'mon-fri'
     scheduler.add_job(sendNotif, 'cron', day_of_week='mon-fri', hour='7')
 
-
+    print(scheduler.print_jobs())
+    
     print('Scheduling is running')
     scheduler.start()
