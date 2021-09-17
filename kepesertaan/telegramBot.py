@@ -688,8 +688,10 @@ contoh : /REKAPBU 2021
                     if not query.exists():
                         pass
                     else:
-                        total = query.aggregate(Sum('nilai_posting'))
-                        msg = "{} : {}".format(m[i],locale.currency(total['nilai_posting__sum'], grouping=True))
+                        # total = query.aggregate(Sum('nilai_posting'))
+                        total = query.values('npp').distinct().count()
+                        # msg = "{} : {}".format(m[i],locale.currency(total['nilai_posting__sum'], grouping=True))
+                        msg = "{} : {}".format(m[i], total)
                         n.append(msg)
                 except:
                     pass
@@ -705,10 +707,12 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</
                     if not query.exists():
                         pass
                     else:
-                        total1 = query.aggregate(Sum('nilai_posting'))
+                        # total1 = query.aggregate(Sum('nilai_posting'))
+                        total1 = query.values('npp').distinct().count()
                         pesan = """
 {} : {}
-                        """.format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
+                        """.format(str(thn), total1)
+                        # format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
                         bot.send_message(message.chat.id, pesan)
                 except:
                     pass

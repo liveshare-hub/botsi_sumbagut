@@ -34,7 +34,7 @@ class DetilMkro(models.Model):
     tgl_upload = models.DateTimeField(db_column='TGL_UPLOAD')  # Field name made lowercase.
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'detil_mkro'
 
     def __str__(self):
