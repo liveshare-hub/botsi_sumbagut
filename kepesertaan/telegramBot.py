@@ -4,6 +4,7 @@ from django.db.models import Q
 import telebot, locale
 import requests, json
 from datetime import datetime
+from channels.db import database_sync_to_async
 from django.conf import settings
 from accounts.models import ExtendUser, kode_kantor
 from detil_mkro.models import DetilMkro
@@ -20,6 +21,8 @@ bot = telebot.TeleBot(settings.BOT_API, parse_mode='html')
 url = "http://localhost:8000/graphql"
 
 # qs = ExtendUser.objects.all()
+async def connect(self):
+    self.message = await database_sync_to_async(self.rekapProg)()
 
 @bot.message_handler(commands=['start',])
 def start(message):
@@ -764,6 +767,7 @@ Mikro : {}
                 except:
                     bot.send_message(message.chat.id, "Data tidak ditemukan!")
 
+@database_sync_to_async
 @bot.message_handler(commands=['REKAPBUPROG'])
 def rekapProg(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id)
