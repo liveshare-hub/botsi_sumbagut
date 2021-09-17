@@ -630,8 +630,10 @@ contoh : /REKAPBUREKON 2021
                 #     nilai_rekon = i.nilai_posting
                     # msg = "{} : {}".format(i.blth_siap_rekon, nilai_rekon)
                     # m = '\n'.join(msg)
-                        total = query.aggregate(Sum('nilai_posting'))
-                        msg = "{} : {}".format(m[i],locale.currency(total['nilai_posting__sum'], grouping=True))
+                        # total = query.aggregate(Sum('nilai_posting'))
+                        total = query.values('npp').distinct().count()
+                        # msg = "{} : {}".format(m[i],locale.currency(total['nilai_posting__sum'], grouping=True))
+                        msg = "{} : {}".format(m[i], total)
                         n.append(msg)
                 except:
                     pass
@@ -643,10 +645,12 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
             for k in range(2,0,-1):
                 thn = tahun - (k)
                 query = DetilMkro.objects.filter(kode_pembina=qs.username, blth_siap_rekon__contains=str(thn))
-                total1 = query.aggregate(Sum('nilai_posting'))
+                # total1 = query.aggregate(Sum('nilai_posting'))
+                total1 = query.values('npp').distinct().count()
                 pesan = """
 {} : {}
-                """.format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
+                """.format(str(thn), total1)
+                # format(str(thn), locale.currency(total1['nilai_posting__sum'], grouping=True))
                 bot.send_message(message.chat.id, pesan)
             for j in range(0,len(n)-1):
                 pesan = """
