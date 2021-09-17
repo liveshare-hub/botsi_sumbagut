@@ -24,6 +24,15 @@ url = "http://localhost:8000/graphql"
 async def connect(self):
     self.message = await database_sync_to_async(self.rekapProg)()
     self.rekapbuskala = await database_sync_to_async(self.rekapbuSkala)()
+    self.rekapbu = await database_sync_to_async(self.rekapbu)()
+    self.rekapburekon = await database_sync_to_async(self.rekapbpurekon)()
+    self.infodetil = await database_sync_to_async(self.infoDetil)()
+    self.profile = await database_sync_to_async(self.profile)()
+    self.infoall = await database_sync_to_async(self.infoall)()
+    self.updatedata = await database_sync_to_async(self.updateData)()
+    self.authtoken = await database_sync_to_async(self.authToken)()
+    self.masuk = await database_sync_to_async(self.masuk)()
+    self.daftar = await database_sync_to_async(self.newRegister)()
 
 @bot.message_handler(commands=['start',])
 def start(message):
@@ -36,6 +45,7 @@ Silahkan ketik /help untuk menu bantuan.
     """.format(nama_dpn)
     bot.send_message(message.chat.id, pesan)
 
+@database_sync_to_async
 @bot.message_handler(commands=['register'])
 def newRegister(message):
     user = message.chat.id
@@ -98,6 +108,7 @@ Terima Kasih
 #             error = data['errors']['nonFieldErrors'][0]
 #             bot.send_message(message.chat.id, error['message'])
 
+@database_sync_to_async
 @bot.message_handler(commands=['login'])
 def masuk(message):
     texts = message.text.split(' ')
@@ -137,6 +148,7 @@ contoh : /update MU150710 1 1 1
             obj, created = ExtendUser.objects.update_or_create(username=username, defaults={'token_auth':data['token'], 'id_telegram':message.chat.id})
             bot.send_message(message.chat.id, pesan)
 
+@database_sync_to_async
 @bot.message_handler(commands=['token'])
 def authToken(message):
     
@@ -296,7 +308,7 @@ query{
                 bot.send_message(message.chat.id, pesan)
         else:
             bot.send_message(message.chat.id, "Menu belum terseida !")
-
+@database_sync_to_async
 @bot.message_handler(commands=['update'])
 def updateData(message):
 
@@ -375,6 +387,7 @@ Bidang : {}
         elif int(qs.id_telegram) != message.chat.id:
             bot.send_message(message.chat.id, "Username harus sesuai")
 
+@database_sync_to_async
 @bot.message_handler(commands=['infoAll'])
 def infoall(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
@@ -444,7 +457,7 @@ SIPP : {}
                     pesan = "NPP yang dimasukkan tidak benar"
                     bot.send_message(message.chat.id, pesan)
 
-
+@database_sync_to_async
 @bot.message_handler(commands=['infoDetil'])
 def infoDetil(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).first()
@@ -532,7 +545,7 @@ IBR IDM        : {}
                     bot.send_message(message.chat.id, pesan)
 
 
-
+@database_sync_to_async
 @bot.message_handler(commands=['profile'])
 def profile(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id).exists()
@@ -583,7 +596,7 @@ Kantor  : {}
         """.format(user, message.chat.first_name, jabatan, bidang, kantor)
         bot.send_message(message.chat.id, pesan)
 
-
+@database_sync_to_async
 @bot.message_handler(commands=['REKAPBUREKON'])
 def rekapbpurekon(message):
     m = []
@@ -641,7 +654,7 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
                 """.format(n[j])
                 bot.send_message(message.chat.id, pesan)
                     
-
+@database_sync_to_async
 @bot.message_handler(commands=['REKAPBU'])
 def rekapbu(message):
     m = []
