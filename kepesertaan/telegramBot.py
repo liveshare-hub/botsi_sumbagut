@@ -23,6 +23,7 @@ url = "http://localhost:8000/graphql"
 # qs = ExtendUser.objects.all()
 async def connect(self):
     self.message = await database_sync_to_async(self.rekapProg)()
+    self.rekapbuskala = await database_sync_to_async(self.rekapbuSkala)()
 
 @bot.message_handler(commands=['start',])
 def start(message):
@@ -710,7 +711,7 @@ Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</
 <i>Sumber MKRO</i>
             """
             bot.send_message(message.chat.id, pesan)
-
+@database_sync_to_async
 @bot.message_handler(commands=['REKAPBUSKALA'])
 def rekapbuSkala(message):
     qs = ExtendUser.objects.filter(id_telegram=message.chat.id)
