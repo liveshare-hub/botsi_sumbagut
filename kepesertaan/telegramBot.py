@@ -384,12 +384,14 @@ Bidang : {}
            
             elif int(qs.id_telegram) != message.chat.id:
                 bot.send_message(message.chat.id, "Username harus sesuai")
-        except:
-            pesan = """
+            else:
+                pesan = """
 Anda tidak dapat melakukan
 <b>UPDATE</b> Akun lebih dari sekali!
-            """
-            bot.send_message(message.chat.id, pesan)
+                """
+                bot.send_message(message.chat.id, pesan)
+        except:
+            pass
 
 @database_sync_to_async
 @bot.message_handler(commands=['infoAll'])
