@@ -80,13 +80,12 @@ errors
             json_data = json.loads(post_json.text)
             print(json_data)
             if post_json.status_code == 200:
-                
-                qs = ExtendUser.objects.filter(username=username)[0]
-                token = qs.token_auth
-        
-                data = json_data['data']['register']
-                if data['success'] == True:
-                    pesan = """
+                try:
+                    qs = ExtendUser.objects.filter(username=username)[0]
+                    token = qs.token_auth
+                    data = json_data['data']['register']
+                    if data['success'] == True:
+                        pesan = """
 Akun <b>{}</b> sudah berhasil didaftarkan.
 Berikut token anda :
 
@@ -95,12 +94,13 @@ Berikut token anda :
 Kemudian verifikasi dengan cara:
 /token token_anda
 Terima Kasih
-                    """.format(username, token)
+                        """.format(username, token)
 
-                    bot.send_message(user, pesan)
-                else: 
-                    bot.send_message(message.chat.id, "user anda belum terdaftar")
-            
+                        bot.send_message(user, pesan)
+                    else: 
+                        bot.send_message(message.chat.id, "user anda belum terdaftar")
+                except:
+                    bot.send_message(message.chat.id, "Pastikan username anda sudah terdaftar dan valid!")
         
 
 #             bot.send_message(user, pesan)
@@ -838,9 +838,9 @@ Berikut adalah rekap PK/BU berdasarkan Program Kantor Cabang {} :
 Berikut adalah rekap PK/BU berdasarkan Program Kepesertaan
 Binaan {} :
 
-4P : {}
-3P : {} 
 2P : {}
+3P : {} 
+4P : {}
 
 
 
