@@ -816,9 +816,9 @@ contoh : /REKAPBUPROG
                         pesan = """
 Berikut adalah rekap PK/BU berdasarkan Program Kantor Cabang {} :
 
-4P : {}
-3P : {} 
 2P : {}
+3P : {} 
+4P : {}
 
 
 
