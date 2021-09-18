@@ -34,11 +34,14 @@ class ExtendUser(AbstractUser):
     id_telegram = models.CharField(blank=True, null=True, max_length=50, verbose_name="telegram")
     token_auth = models.CharField(blank=True, null=True, max_length=200, verbose_name="Token")
     tgl_token = models.DateTimeField(auto_now_add=True)
+    updated = models.BooleanField(default=False)
 
 
     def save(self, *args, **kwargs):
         if self.token_auth == '' or self.token_auth is None:
             self.token_auth = generateUniqueCode()
+        if self.token_auth:
+            self.updated = True
         super(ExtendUser, self).save(*args, **kwargs)
     
 

@@ -78,7 +78,7 @@ errors
 
             post_json = requests.post(url, json={'query':query})
             json_data = json.loads(post_json.text)
-            print(json_data)
+            
             if post_json.status_code == 200:
                 try:
                     qs = ExtendUser.objects.filter(username=username)[0]
@@ -100,13 +100,15 @@ Terima Kasih
                     else: 
                         bot.send_message(message.chat.id, "user anda belum terdaftar")
                 except:
-                    bot.send_message(message.chat.id, "Pastikan username anda sudah terdaftar dan valid!")
-        
+                    pesan = """
+Pendaftaran user gagal!
+Periksa kembali user anda
+Atau hubungi IT Kanwil.
 
-#             bot.send_message(user, pesan)
-#         elif data['errors']:
-#             error = data['errors']['nonFieldErrors'][0]
-#             bot.send_message(message.chat.id, error['message'])
+Terima Kasih
+                    """
+                    bot.send_message(message.chat.id, pesan)
+        
 
 @database_sync_to_async
 @bot.message_handler(commands=['login'])
@@ -333,15 +335,14 @@ id kantor 901 = 1
         bot.send_message(message.chat.id, "/update ")
     else:
         username = texts[1]
-        qs = ExtendUser.objects.filter(username=username).first()
-        # print(qs.id_telegram)
-        # print(message.chat.id)
-        if int(qs.id_telegram) == message.chat.id:
-            jabatan = int(texts[2])
-            bidang = int(texts[3])
-            kdKantor = int(texts[4])
-            idTelegram = str(message.chat.id)
-            query = """
+        try:
+            qs = ExtendUser.objects.filter(username=username).first()
+            if (int(qs.id_telegram) == message.chat.id) and (qs.updated == False):
+                jabatan = int(texts[2])
+                bidang = int(texts[3])
+                kdKantor = int(texts[4])
+                idTelegram = str(message.chat.id)
+                query = """
 mutation{
   updateUser(id:%d, bidang:%d, jabatan:%d, kdKantor:%d){
     users{
@@ -363,15 +364,13 @@ mutation{
     }
   }
 }
-            """ % (qs.pk, jabatan, bidang, kdKantor)
+             """ % (qs.pk, jabatan, bidang, kdKantor)
 
-            post_json = requests.post(url, json={'query':query})
-            json_data = json.loads(post_json.text)
-            # print(json_data)
-            # data = json_data['data']['updateUser']['users']
-            if json_data['data']['updateUser'] is not None:
-                data = json_data['data']['updateUser']['users']
-                pesan = """
+                post_json = requests.post(url, json={'query':query})
+                json_data = json.loads(post_json.text)
+                if json_data['data']['updateUser'] is not None:
+                    data = json_data['data']['updateUser']['users']
+                    pesan = """
 Data user <b>{}</b> berhasil diupdate.
 
 Kantor : {} - {}
@@ -379,13 +378,18 @@ Kantor : {} - {}
 Jabatan : {}
 
 Bidang : {}
-                """.format(data['username'], data['kdKantor']['kdKantor'], data['kdKantor']['namaKantor'],
-                    data['jabatan']['namaJabatan'],data['bidang']['namaBidang'])
-                bot.send_message(idTelegram, pesan)
-            # else:
-            #     bot.send_message(idTelegram,"Terjadi Kesalahan!. Hubungi Administrator")
-        elif int(qs.id_telegram) != message.chat.id:
-            bot.send_message(message.chat.id, "Username harus sesuai")
+                    """.format(data['username'], data['kdKantor']['kdKantor'], data['kdKantor']['namaKantor'],
+                        data['jabatan']['namaJabatan'],data['bidang']['namaBidang'])
+                    bot.send_message(idTelegram, pesan)
+           
+            elif int(qs.id_telegram) != message.chat.id:
+                bot.send_message(message.chat.id, "Username harus sesuai")
+        except:
+            pesan = """
+Anda tidak dapat melakukan
+<b>UPDATE</b> Akun lebih dari sekali!
+            """
+            bot.send_message(message.chat.id, pesan)
 
 @database_sync_to_async
 @bot.message_handler(commands=['infoAll'])
