@@ -753,7 +753,7 @@ contoh : /REKAPBUSKALA
         else:
             if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
                 try:
-                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('skl_usaha').annotate(jlh=Count('skl_usaha'))
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('skl_usaha').annotate(jlh=Count('skl_usaha', distinct=True))
                     pesan = """
 Berikut adalah rekap PK/BU berdasarkan Skala Usaha Kantor Cabang {} :
 Besar : {}
@@ -770,7 +770,7 @@ Mikro : {}
                     bot.send_message(message.chat.id, "Data tidak ditemukan!")
             else:
                 try:
-                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('skl_usaha').annotate(jlh=Count('skl_usaha'))
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('skl_usaha').annotate(jlh=Count('skl_usaha', distinct=True))
                     pesan = """
 Berikut adalah rekap PK/BU berdasarkan Skala Usaha
 Kantor Cabang {} dengan pembina {} :
@@ -810,7 +810,7 @@ contoh : /REKAPBUSKALA
             if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
                 try:
                 
-                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('prog').annotate(jlh=Count('prog'))
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('prog').annotate(jlh=Count('npp', distinct=True))
                 
                     if query.exists():
                         pesan = """
@@ -832,7 +832,7 @@ Berikut adalah rekap PK/BU berdasarkan Program Kantor Cabang {} :
                     bot.send_message(message.chat.id, "Otoritas tidak cukup! Hanya untuk Kakacab dan Kabid")
             else:
                 try:
-                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('prog'))
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('npp', distinct=True))
                     if query.exists():
                         pesan = """
 Berikut adalah rekap PK/BU berdasarkan Program Kepesertaan
