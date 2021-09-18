@@ -764,7 +764,7 @@ Mikro : {}
 
 <i>**Sumber : MKRO</i>
 
-                        """.format(qs[0].kd_kantor, query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                        """.format(qs[0].kd_kantor, query[0]['jlh'],query[2]['jlh'],query[1]['jlh'],query[3]['jlh'])
                     bot.send_message(message.chat.id, pesan)
                 except:
                     bot.send_message(message.chat.id, "Data tidak ditemukan!")
@@ -784,7 +784,7 @@ Mikro : {}
 
 
 <i>**Sumber : MKRO</i>
-                    """.format(qs[0].kd_kantor, qs[0].username,query[3]['jlh'],query[2]['jlh'],query[1]['jlh'],query[0]['jlh'])
+                    """.format(qs[0].kd_kantor, qs[0].username,query[0]['jlh'],query[2]['jlh'],query[1]['jlh'],query[3]['jlh'])
                     bot.send_message(message.chat.id, pesan)
                 except:
                     bot.send_message(message.chat.id, "Data tidak ditemukan!")
