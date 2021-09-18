@@ -802,15 +802,15 @@ def rekapProg(message):
         if len(texts) > 1 :
             pesan = """
 Format anda <b>Salah</b>
-Gunakan perintah /REKAPBUSKALA
-contoh : /REKAPBUSKALA
+Gunakan perintah /REKAPBUPROG
+contoh : /REKAPBUPROG
             """
             bot.send_message(message.chat.id, pesan)
         else:
             if qs.filter(Q(jabatan__id=3) | Q(jabatan__id=4)):
                 try:
                 
-                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('prog').annotate(jlh=Count('npp', distinct=True))
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor).values('prog').annotate(jlh=Count('prog', distinct=True))
                 
                     if query.exists():
                         pesan = """
@@ -832,7 +832,7 @@ Berikut adalah rekap PK/BU berdasarkan Program Kantor Cabang {} :
                     bot.send_message(message.chat.id, "Otoritas tidak cukup! Hanya untuk Kakacab dan Kabid")
             else:
                 try:
-                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('npp', distinct=True))
+                    query = DetilMkro.objects.filter(kode_kantor=qs[0].kd_kantor.kd_kantor, kode_pembina=qs[0].username).values('prog').annotate(jlh=Count('prog', distinct=True))
                     if query.exists():
                         pesan = """
 Berikut adalah rekap PK/BU berdasarkan Program Kepesertaan
