@@ -78,7 +78,7 @@ errors
 
             post_json = requests.post(url, json={'query':query})
             json_data = json.loads(post_json.text)
-            print(post_json)
+            print(json_data)
             if post_json.status_code == 200:
                 try:
                     qs = ExtendUser.objects.filter(username=username)[0]
