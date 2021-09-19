@@ -40,7 +40,7 @@ class ExtendUser(AbstractUser):
     def save(self, *args, **kwargs):
         if self.token_auth == '' or self.token_auth is None:
             self.token_auth = generateUniqueCode()
-        if self.token_auth:
+        if self.jabatan:
             self.updated = True
         super(ExtendUser, self).save(*args, **kwargs)
     
