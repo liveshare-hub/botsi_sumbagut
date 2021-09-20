@@ -1,5 +1,6 @@
 import requests
 import locale
+from channels.db import database_sync_to_async
 from .models import DetilMkro
 from accounts.models import ExtendUser
 from datetime import timedelta
@@ -13,6 +14,10 @@ yt_t = yt + timedelta(days=2)
 
 url = "https://api.telegram.org/bot{}/sendMessage".format(settings.BOT_API)
 
+async def connect(self):
+    self.sendNotif = await database_sync_to_async(self.sendNotif)()
+
+@database_sync_to_async
 def sendNotif():
     users = ExtendUser.objects.filter(is_superuser=False)
     
