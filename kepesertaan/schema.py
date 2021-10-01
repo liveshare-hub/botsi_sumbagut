@@ -1,4 +1,6 @@
+from django.db.models.aggregates import Count
 import graphene
+from graphene.types.scalars import Int
 from graphql_auth import mutations
 # from graphql_auth.decorators import login_required
 from graphene_django import DjangoObjectType
@@ -113,9 +115,22 @@ class Query(UserQuery, MeQuery, graphene.ObjectType):
     all_jabatan = graphene.List(JabatanType)
     all_bidang = graphene.List(BidangType)
     all_kode_kantor = graphene.List(KodeKantorType)
-    all_detil_mkro = graphene.List(DetilMkroType, npp=graphene.String(), user=graphene.ID())
+    info_pkbu = graphene.List(DetilMkroType, npp=graphene.String())
+    info_detil_pkbu = graphene.List(DetilMkroType, npp=graphene.String())
+    rekapBu_rekon = graphene.List(DetilMkroType, kantor_kode=graphene.String(), tgl=graphene.String())
+    all_detil_mkro = graphene.List(DetilMkroType, npp=graphene.String(), user=graphene.ID(), jabatan=graphene.ID(), bidang=graphene.ID())
     detil_user_id = graphene.List(ExtendUserType, telegram=graphene.String())
     pass
+
+    def resolve_info_pkbu(root, info, npp):
+        return DetilMkro.objects.filter(npp=npp).order_by('-tgl_upload')[:1]
+
+    def resolve_info_detil_pkbu(root, info, npp):
+        return DetilMkro.objects.filter(npp=npp).order_by('-tgl_upload')[:1]
+
+    def resolve_rekapBu_rekon(root, info, kantor_kode, tgl):
+        jlh = DetilMkro.objects.filter(kode_kantor=kantor_kode, blth_siap_rekon=tgl).values('npp').annotate(jlh=Count('npp', distinct=True))
+        return jlh['jlh']
 
     def resolve_all_target_realisasi(root, info, periode=None, user=None):
         

@@ -160,6 +160,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.ExtendUser'
 
 GRAPHENE = {
+    # 'SCHEMA':'detil_mkro.schema.schema',
     'SCHEMA':'kepesertaan.schema.schema',
     'MIDDLEWARE': [
         'graphql_jwt.middleware.JSONWebTokenMiddleware'

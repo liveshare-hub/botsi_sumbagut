@@ -413,61 +413,36 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = """
-query{
-  infoPkbu(npp:"%s") {
-    kodePembina
-    namaPembina
-    npp
-    div1
-    namaPrsh
-    kepsAwal
-    kepsJp
-    blthNa
-    prog
-    totalTkAktif
-    totalIuranBerjalan
-    blthAkhir
-    sipp
-    tglUpload
-  }
-}            
-            """ % (npp)
-            get_json = (requests.get(url, json={'query':query}))
-            json_data = json.loads(get_json.text)
-            # print(json_data)
-            data = json_data['data']
-            data_pkbu = data['infoPkbu']
-            # print(data_pkbu[0])
-            if data_pkbu == []:
-                bot.send_message(message.chat.id,"NPP tidak ditemukan!")
-            else:
-                tgl = datetime.strptime(data_pkbu[0]['tglUpload'][:10], '%Y-%m-%d').strftime('%d-%m-%Y')
-                # print(tgl1)
-                div = data_pkbu[0]['div1']
-                user = data_pkbu[0]['kodePembina']
-                nama = data_pkbu[0]['namaPembina']
-                prsh = data_pkbu[0]['namaPrsh']
-                keps_awl = data_pkbu[0]['kepsAwal']
-                if data_pkbu[0]['kepsJp'] == '' or data_pkbu[0]['kepsJp'] is None:
-                    jp = '-'
-                else:
-                    jp = data_pkbu[0]['kepsJp']
-                if data_pkbu[0]['blthNa'] == '- ' or data_pkbu[0]['blthNa'] == '':
-                    na = 'Aktif'
-                else:
-                    na = data_pkbu[0]['blthNa']
-                prog = data_pkbu[0]['prog']
-                aktif = data_pkbu[0]['totalTkAktif']
-                locale.setlocale(locale.LC_MONETARY, 'id_ID')
-                iuran_jln = locale.currency(data_pkbu[0]['totalIuranBerjalan'], grouping=True)
-                rekon = data_pkbu[0]['blthAkhir']
-                if data_pkbu[0]['sipp'] == 1:
-                    sipp = 'YA'
-                else:
-                    sipp = 'TIDAK'
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            # print(query)
+            
+            if query is None:
                 pesan = """
-\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+Pastikan <b>NPP</> yang anda input adalah benar.
+
+
+<b>**</b><i>botsi sumbagut</i>
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                try:
+                    
+                    if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                        keps_jp = 'Tidak'
+                    else:
+                        keps_jp = query.keps_jp
+                    if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                        blthNa = 'Aktif'
+                    else:
+                        blthNa = 'NA sejak :' + query.blth_na
+                    if query.sipp == 1 or query.sipp == '1':
+                        sipp = 'YA'
+                    else:
+                        sipp = 'TIDAK'
+
+                    locale.setlocale(locale.LC_MONETARY, 'id_ID')
+                    iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                    pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -480,10 +455,13 @@ Total Iuran Berjalan : <b>{}</b>
 BLTH Rekon Terakhir : {}
 SIPP : {}
 
-<i>Sumber : MKRO</i>
-                """.format(npp, div,tgl, user, nama, prsh, keps_awl, jp, na, prog, aktif, iuran_jln, rekon, sipp)
-                bot.send_message(message.chat.id, pesan)
-            
+<i>Sumber : MKRO</i>          
+                    """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                        keps_jp,blthNa, query.prog,query.total_tk_aktif,iuran_berjalan,query.blth_akhir,sipp)
+                    bot.send_message(message.chat.id, pesan)
+                except:
+                    pesan = "NPP yang dimasukkan tidak benar"
+                    bot.send_message(message.chat.id, pesan)
 
 @database_sync_to_async
 @bot.message_handler(commands=['infoDetil'])
@@ -505,85 +483,39 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = """
-query {
-  infoDetilPkbu(npp:"%s"){
-    namaPrsh
-    div1
-    tglUpload
-    kodePembina
-    namaPembina
-    namaPrsh
-    kepsAwal
-    kepsJp
-    blthNa
-    pareto
-    sklUsaha
-    prog
-    tambahTk
-    kurangTk
-    totalTkAktif
-    totalTkNa
-    jmlAllTk
-    totalIuranBerjalan
-    blthAkhir
-    sipp
-    itw
-    ibrIjt
-    ibrIdm
-  }
-}
-            """ % (npp)
-            get_json = requests.get(url, json={'query':query})
-            json_data = json.loads(get_json.text)
-            data = json_data['data']
-            detil_pkbu = data['infoDetilPkbu']
-            if detil_pkbu == []:
-                bot.send_message(message.chat.id, "NPP tidak ditemukan!")
-            else:
-                tgl = datetime.strptime(detil_pkbu[0]['tglUpload'][:10], '%Y-%m-%d').strftime('%d-%m-%Y')
-                div = detil_pkbu[0]['div1']
-                user = detil_pkbu[0]['kodePembina']
-                nama = detil_pkbu[0]['namaPembina']
-                prsh = detil_pkbu[0]['namaPrsh']
-                keps_awal = detil_pkbu[0]['kepsAwal']
-                if detil_pkbu[0]['kepsJp'] == '' or detil_pkbu[0]['kepsJp'] is None:
-                    jp = '-'
-                else:
-                    jp = detil_pkbu[0]['kepsJp']
-                if detil_pkbu[0]['blthNa'] == '- ' or detil_pkbu[0]['blthNa'] == '':
-                    na = 'Aktif'
-                else:
-                    na = detil_pkbu[0]['blthNa']
-                pareto = detil_pkbu[0]['pareto']
-                skl = detil_pkbu[0]['sklUsaha']
-                prog = detil_pkbu[0]['prog']
-                tambah = detil_pkbu[0]['tambahTk']
-                kurang = detil_pkbu[0]['kurangTk']
-                aktif = detil_pkbu[0]['totalTkAktif']
-                tkNa = detil_pkbu[0]['totalTkNa']
-                total = detil_pkbu[0]['jmlAllTk']
-                locale.setlocale(locale.LC_MONETARY, 'id_ID')
-                iuran_jln = locale.currency(detil_pkbu[0]['totalIuranBerjalan'], grouping=True)
-                rekon = detil_pkbu[0]['blthAkhir']
-                if detil_pkbu[0]['sipp'] == 1:
-                    sipp = 'YA'
-                else:
-                    sipp = 'TIDAK'
-                if detil_pkbu[0]['itw'] == 1:
-                    itw = 'YA'
-                else:
-                    itw = 'TIDAK'
-                if detil_pkbu[0]['ibrIjt'] == 1:
-                    ijt = 'YA'
-                else:
-                    ijt = 'TIDAK'
-                if detil_pkbu[0]['ibrIdm'] == 1:
-                    idm = 'YA'
-                else:
-                    idm = 'TIDAK'
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            if query is None:
                 pesan = """
-\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+Pastikan <b>NPP</> yang anda input adalah benar.
+
+
+
+<b>**</b><i>botsi sumbagut</i>
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                try:
+                    if query:
+                        if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                            keps_jp = 'Tidak'
+                        else:
+                            keps_jp = query.keps_jp
+                        if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                            blthNa = 'Aktif'
+                        else:
+                            blthNa = 'NA sejak :' + query.blth_na
+                        if query.sipp == 1 or query.sipp == '1':
+                            sipp = 'YA'
+                        else:
+                            sipp = 'TIDAK'
+                        if query.itw == 1 or query.itw == '1':
+                            itw = 'YA'
+                        else:
+                            itw = 'TIDAK'
+
+                        locale.setlocale(locale.LC_MONETARY, 'id_ID')
+                        iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                        pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -608,11 +540,17 @@ IBR IDM        : {}
 
 
 
-<i>Sumber : MKRO</i>
-                """.format(npp, div, tgl, user, nama, prsh, keps_awal, jp, na, pareto, skl, prog,
-                    tambah, kurang, aktif, tkNa, total, iuran_jln, rekon, sipp, itw, ijt, idm)
-                bot.send_message(message.chat.id, pesan)
-                    
+<i>Sumber : MKRO</i>          
+                        """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                            keps_jp,blthNa,query.pareto,query.skl_usaha, query.prog,query.tambah_tk,query.kurang_tk,query.total_tk_aktif,
+                                query.total_tk_na,query.jml_all_tk,iuran_berjalan,query.blth_akhir,
+                                sipp,itw,query.ibr_ijt,query.ibr_idm)
+                        bot.send_message(message.chat.id, pesan)
+                except AttributeError as ex:
+                    pesan = "NPP yang dimasukkan tidak benar. Error: {}".format(ex)
+                    bot.send_message(message.chat.id, pesan)
+
+
 @database_sync_to_async
 @bot.message_handler(commands=['profile'])
 def profile(message):
@@ -644,17 +582,12 @@ query{
         get_json = requests.get(url, json={'query':query})
         json_data = json.loads(get_json.text)
         # print(json_data)
-        # data = json_data['data']['detilUserId'][0]
-        data = json_data['data']
-        detil = data['detilUserId']
-        if detil == []:
-            bot.send_message(message.chat.id, "Akun tidak ditemukan")
-        else:
-            user = detil[0]['username']
-            kantor = detil[0]['kdKantor']['kdKantor']+' - '+detil[0]['kdKantor']['namaKantor']
-            jabatan = detil[0]['jabatan']['namaJabatan']
-            bidang = detil[0]['bidang']['namaBidang']
-            pesan = """
+        data = json_data['data']['detilUserId'][0]
+        user = data['username']
+        kantor = data['kdKantor']['kdKantor']+' - '+data['kdKantor']['namaKantor']
+        jabatan = data['jabatan']['namaJabatan']
+        bidang = data['bidang']['namaBidang']
+        pesan = """
 Detil Profile <b><u>{}</u></b>:
 
 <pre>
@@ -666,8 +599,8 @@ Kantor  : {}
 </pre>
 
 <b>**</b><i>botsi sumbagut</i>
-            """.format(user, message.chat.first_name, jabatan, bidang, kantor)
-            bot.send_message(message.chat.id, pesan)
+        """.format(user, message.chat.first_name, jabatan, bidang, kantor)
+        bot.send_message(message.chat.id, pesan)
 
 @database_sync_to_async
 @bot.message_handler(commands=['REKAPBUREKON'])
