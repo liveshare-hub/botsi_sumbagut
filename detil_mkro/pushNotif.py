@@ -23,7 +23,7 @@ def sendNotif():
     
     qs = DetilMkro.objects.all()
     for user in users:
-        datas = qs.filter(tgl_upload__range=(yt,today))
+        datas = qs.filter(tgl_upload__range=(yt_t,today))
         locale.setlocale(locale.LC_MONETARY,'id_ID')
         if datas.exists():
             for data in datas:

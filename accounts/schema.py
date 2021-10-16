@@ -1,19 +1,19 @@
-import graphene
-from graphql_auth import mutations
-from graphene_django import DjangoObjectType
-from graphql_auth.schema import UserQuery, MeQuery
+# import graphene
+# from graphql_auth import mutations
+# from graphene_django import DjangoObjectType
+# from graphql_auth.schema import UserQuery, MeQuery
 
-class AuthMutation(graphene.ObjectType):
-    register = mutations.Register.Field()
-    verify_account = mutations.VerifyAccount.Field()
-    token_auth = mutations.ObtainJSONWebToken.Field()
-    update_account = mutations.UpdateAccount.Field()
-    # update_account = UserMutation.Field()
+# class AuthMutation(graphene.ObjectType):
+#     register = mutations.Register.Field()
+#     verify_account = mutations.VerifyAccount.Field()
+#     token_auth = mutations.ObtainJSONWebToken.Field()
+#     update_account = mutations.UpdateAccount.Field()
+#     # update_account = UserMutation.Field()
 
-class Query(UserQuery, MeQuery, graphene.ObjectType):
-    pass
+# class Query(UserQuery, MeQuery, graphene.ObjectType):
+#     pass
 
-class Mutation(AuthMutation, graphene.ObjectType):
-    pass
+# class Mutation(AuthMutation, graphene.ObjectType):
+#     pass
 
-schema = graphene.Schema(query=Query, mutation=Mutation)
+# schema = graphene.Schema(query=Query, mutation=Mutation)

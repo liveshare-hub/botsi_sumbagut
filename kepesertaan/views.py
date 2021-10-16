@@ -5,7 +5,7 @@ from accounts.models import kode_kantor
 from .scrapingPDF import Scrapping
 from datetime import datetime
 # Create your views here.
-from graphql_auth.mixins import UserStatus
+# from graphql_auth.mixins import UserStatus
 
 def index(request):
     form = TargetForm(request.POST)
@@ -25,6 +25,6 @@ def index(request):
 
     return render(request,'kepesertaan/cari.html',{'form':form})
 
-def verifikasi(request, token):
-    UserStatus.verify(token)
-    return HttpResponse({"success":"Akun berhasil di verifikasi"})
+# def verifikasi(request, token):
+#     UserStatus.verify(token)
+#     return HttpResponse({"success":"Akun berhasil di verifikasi"})

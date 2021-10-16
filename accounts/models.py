@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from kepesertaan.fungsi import generateUniqueCode
+# from kepesertaan.fungsi import generateUniqueCode
 import datetime
 # Create your models here.
 
@@ -38,8 +38,8 @@ class ExtendUser(AbstractUser):
 
 
     def save(self, *args, **kwargs):
-        if self.token_auth == '' or self.token_auth is None:
-            self.token_auth = generateUniqueCode()
+        # if self.token_auth == '' or self.token_auth is None:
+        #     self.token_auth = generateUniqueCode()
         if self.jabatan:
             self.updated = True
         super(ExtendUser, self).save(*args, **kwargs)

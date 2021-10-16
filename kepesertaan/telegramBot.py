@@ -6,13 +6,17 @@ import requests, json
 from datetime import datetime
 from channels.db import database_sync_to_async
 from django.conf import settings
-from accounts.models import ExtendUser, kode_kantor
+from accounts.models import ExtendUser, kode_kantor, m_bidang, m_jabatan
 from detil_mkro.models import DetilMkro
 from detil_mkro.rupiah import rupiah_format
+from kepesertaan.fungsi import generateUniqueCode
 
 from telebot import apihelper
 
 from .decorators import restricted
+
+import schedule
+import time
 
 apihelper.ENABLE_MIDDLEWARE = True
 apihelper.SESSION_TIME_TO_LIVE = 5 * 60
@@ -63,29 +67,12 @@ def newRegister(message):
         if qs.exists():
             bot.send_message(user, "Anda tidak dapat mendaftarkan akun lagi!")
         else:
-            query = """
-mutation{
-register(email:"%s",username:"%s", password1:"%s", password2:"%s")
-{
-token
-refreshToken
-success
-errors
-
-}
-}
-            """ % (email, username, password1, password2)
-
-            post_json = requests.post(url, json={'query':query})
-            json_data = json.loads(post_json.text)
-            print(json_data)
-            if post_json.status_code == 200:
+            if password1 == password2:
+                ExtendUser.objects.create(email=email, username=username, password=password1, id_telegram=message.chat.id)
                 try:
                     qs = ExtendUser.objects.filter(username=username)[0]
-                    token = qs.token_auth
-                    data = json_data['data']['register']
-                    if data['success'] == True:
-                        pesan = """
+                    token = generateUniqueCode()
+                    pesan = """
 Akun <b>{}</b> sudah berhasil didaftarkan.
 Berikut token anda :
 
@@ -94,20 +81,56 @@ Berikut token anda :
 Kemudian verifikasi dengan cara:
 /token token_anda
 Terima Kasih
-                        """.format(username, token)
-
-                        bot.send_message(user, pesan)
-                    else: 
-                        bot.send_message(message.chat.id, "user anda belum terdaftar")
-                except:
-                    pesan = """
-Pendaftaran user gagal!
-Periksa kembali user anda
-Atau hubungi IT Kanwil.
-
-Terima Kasih
-                    """
+                    """.format(username, token)
                     bot.send_message(message.chat.id, pesan)
+                except:
+                    pass
+                    
+#             query = """
+# mutation{
+# register(email:"%s",username:"%s", password1:"%s", password2:"%s")
+# {
+# token
+# refreshToken
+# success
+# errors
+
+# }
+# }
+#             """ % (email, username, password1, password2)
+
+#             post_json = requests.post(url, json={'query':query})
+#             json_data = json.loads(post_json.text)
+#             print(json_data)
+#             if post_json.status_code == 200:
+#                 try:
+#                     qs = ExtendUser.objects.filter(username=username)[0]
+#                     token = qs.token_auth
+#                     data = json_data['data']['register']
+#                     if data['success'] == True:
+#                         pesan = """
+# Akun <b>{}</b> sudah berhasil didaftarkan.
+# Berikut token anda :
+
+# <pre>{}</pre>
+
+# Kemudian verifikasi dengan cara:
+# /token token_anda
+# Terima Kasih
+#                         """.format(username, token)
+
+#                         bot.send_message(user, pesan)
+#                     else: 
+#                         bot.send_message(message.chat.id, "user anda belum terdaftar")
+#                 except:
+#                     pesan = """
+# Pendaftaran user gagal!
+# Periksa kembali user anda
+# Atau hubungi IT Kanwil.
+
+# Terima Kasih
+#                     """
+#                     bot.send_message(message.chat.id, pesan)
         
 
 @database_sync_to_async
@@ -119,22 +142,25 @@ def masuk(message):
     else:
         username = texts[1]
         password = texts[2]
-        query = """
-mutation{
-  tokenAuth(username:"%s",password:"%s") {
-    token
-    success
-    errors
-    unarchiving
-    refreshToken
-  }
-}
+        qs = ExtendUser.objects.filter(username=username, password=password)[0]
+        if qs:
 
-        """ % (username, password)
-        post_json = requests.post(url, json={'query':query})
-        json_data = json.loads(post_json.text)
-        data = json_data['data']['tokenAuth']
-        if data['success'] == True:
+#         query = """
+# mutation{
+#   tokenAuth(username:"%s",password:"%s") {
+#     token
+#     success
+#     errors
+#     unarchiving
+#     refreshToken
+#   }
+# }
+
+#         """ % (username, password)
+#         post_json = requests.post(url, json={'query':query})
+#         json_data = json.loads(post_json.text)
+#         data = json_data['data']['tokenAuth']
+#         if data['success'] == True:
             pesan = """
 Anda sudah berhasil Login!.
 Silahkan anda melakukan update akun
@@ -147,7 +173,7 @@ contoh : /update MU150710 1 1 1
 
 
         """
-            obj, created = ExtendUser.objects.update_or_create(username=username, defaults={'token_auth':data['token'], 'id_telegram':message.chat.id})
+            # obj, created = ExtendUser.objects.update_or_create(username=username, defaults={'token_auth':data['token'], 'id_telegram':message.chat.id})
             bot.send_message(message.chat.id, pesan)
 
 @database_sync_to_async
@@ -159,24 +185,33 @@ def authToken(message):
         bot.send_message(message.chat.id, "Format Salah!")
     else:
         kd_token = texts[1]
-        query = """
-mutation{
-  verifyToken(
-    token:"%s"
-  ) {
-    success
-    errors
-  }
-}
-        """ % (kd_token)
+        qs = ExtendUser.objects.filter(id_telegram=message.chat.id)[0]
+        try:
+            ExtendUser.objects.update_or_create(username=qs.username, defaults={'token_auth':kd_token})
+            pesan = """
+Akun adan sudah Terverifikasi!
+            """
+            bot.send_message(message.chat.id, pesan)
+        except:
+            bot.send_message(message.chat.id,"Akun Salah!")
+#         query = """
+# mutation{
+#   verifyToken(
+#     token:"%s"
+#   ) {
+#     success
+#     errors
+#   }
+# }
+#         """ % (kd_token)
 
-        qs = ExtendUser.objects.filter(token_auth=kd_token)
-        username = qs[0].username
-        if not qs or qs is None:
-            bot.send_message(message.chat.id, "Token Expired!")
-        else:
-            qs.update_or_create(username=username, defaults={'id_telegram':message.chat.id})
-            bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
+        # qs = ExtendUser.objects.filter(token_auth=kd_token)
+        # username = qs[0].username
+        # if not qs or qs is None:
+        #     bot.send_message(message.chat.id, "Token Expired!")
+        # else:
+        #     qs.update_or_create(username=username, defaults={'id_telegram':message.chat.id})
+        #     bot.send_message(message.chat.id,"Token anda sudah terverifikasi")
 
 @bot.message_handler(commands=['help'])
 def help(message):
@@ -212,7 +247,7 @@ Setelah berhasil login <b>di WAJIBKAN</b>
 bagi anda untuk melakukan update akun
 seperti jabata, bidang, kode kantor dan id telegram
 
-/update <b>username id_bidang id_jabatan id_kantor</b>
+/update <b>username id_jabatan id_bidang id_kantor</b>
 contoh : /update MU150710 1 1 1
 
 Menampilakn Profile Akun:
@@ -254,60 +289,83 @@ Terima Kasih
             pesan = "ID Telegram anda adalah {}".format(user)
             bot.send_message(user, pesan)
         elif texts[1] == 'list_jabatan':
-            query = """
-query{
-  allJabatan{
-    id
-    namaJabatan
-  }
-}
-        """
-            post_json = requests.post(url, json={'query':query})
-            json_data = json.loads(post_json.text)
-            data = json_data['data']['allJabatan']
-            for i in range(0,len(data)):
-            # jabatan = ''.join(data[i])
+            bot.send_message(message.chat.id, "Daftar Jabatan: \n")
+            query = m_jabatan.objects.all().order_by('id')
+            if query is not None:
+                for q in query:
+                    pesan = """
+{}. {}
+                    """.format(q.id, q.nama_jabatan)
+#             query = """
+# query{
+#   allJabatan{
+#     id
+#     namaJabatan
+#   }
+# }
+#         """
+#             post_json = requests.post(url, json={'query':query})
+#             json_data = json.loads(post_json.text)
+#             data = json_data['data']['allJabatan']
+#             for i in range(0,len(data)):
+#             # jabatan = ''.join(data[i])
             
-                pesan = """
+#                 pesan = """
 
-{} - {}
+# {} - {}
      
 
-                """.format(data[i]['id'],data[i]['namaJabatan'])
+#                 """.format(data[i]['id'],data[i]['namaJabatan'])
         # % (jabatan['id'], jabatan['namaJabatan'])
-                bot.send_message(message.chat.id, pesan)
+                    bot.send_message(message.chat.id, pesan)
         elif texts[1] == "list_bidang":
-            query = """
-query{
-    allBidang {
-        id
-        namaBidang
-        }
-}
-        """
-            post_json = requests.post(url, json={'query':query})
-            json_data = json.loads(post_json.text)
-            data = json_data['data']['allBidang']
-            for i in range(0, len(data)):
-                pesan = "{} - {}".format(data[i]['id'], data[i]['namaBidang'])
-                bot.send_message(message.chat.id, pesan)
+            query = m_bidang.objects.all().order_by('id')
+            if query is not None:
+                bot.send_message(message.chat.id, "Daftar Bidang: \n")
+                for q in query:
+                    pesan = """
+{}. {}
+                    """.format(q.id, q.nama_bidang)
+#             query = """
+# query{
+#     allBidang {
+#         id
+#         namaBidang
+#         }
+# }
+#         """
+            # post_json = requests.post(url, json={'query':query})
+            # json_data = json.loads(post_json.text)
+            # data = json_data['data']['allBidang']
+            # for i in range(0, len(data)):
+            #     pesan = "{} - {}".format(data[i]['id'], data[i]['namaBidang'])
+                    bot.send_message(message.chat.id, pesan)
     
         elif texts[1] == "list_kantor":
-            query = """
-query{
-  allKodeKantor {
-    id
-    namaKantor
-    kdKantor
-  }
-}
-        """
-            post_json = requests.get(url, json={'query':query})
-            json_data = json.loads(post_json.text)
-            data = json_data['data']['allKodeKantor']
-            for i in range(0, len(data)):
-                pesan = "{}. {} - {}".format(data[i]['id'],data[i]['kdKantor'],data[i]['namaKantor'])
-                bot.send_message(message.chat.id, pesan)
+            bot.send_message(message.chat.id,"Daftar Kantor Cabang Kanwil Sumbagut:")
+            query = kode_kantor.objects.all().order_by('kd_kantor')
+            if query is not None:
+                for kantor in query:
+                    pesan = """
+
+{}.{} - {}
+
+                    """.format(kantor.id, kantor.kd_kantor, kantor.nama_kantor)
+#             query = """
+# query{
+#   allKodeKantor {
+#     id
+#     namaKantor
+#     kdKantor
+#   }
+# }
+#         """
+            # post_json = requests.get(url, json={'query':query})
+            # json_data = json.loads(post_json.text)
+            # data = json_data['data']['allKodeKantor']
+            # for i in range(0, len(data)):
+            #     pesan = "{}. {} - {}".format(data[i]['id'],data[i]['kdKantor'],data[i]['namaKantor'])
+                    bot.send_message(message.chat.id, pesan)
         else:
             bot.send_message(message.chat.id, "Menu belum terseida !")
 @database_sync_to_async
@@ -336,41 +394,16 @@ id kantor 901 = 1
     else:
         username = texts[1]
         try:
-            qs = ExtendUser.objects.filter(username=username).first()
-            if (int(qs.id_telegram) == message.chat.id) and (qs.updated == False):
-                jabatan = int(texts[2])
-                bidang = int(texts[3])
+            qs = ExtendUser.objects.filter(username=username)[0]
+            if qs.updated:
+                bot.send_message(message.chat.id, "Update data hanya bisa sekali!")
+            
+            else:
+                bidang = int(texts[2])
+                jabatan = int(texts[3])
                 kdKantor = int(texts[4])
-                idTelegram = str(message.chat.id)
-                query = """
-mutation{
-  updateUser(id:%d, bidang:%d, jabatan:%d, kdKantor:%d){
-    users{
-      id
-      username
-      bidang{
-        id
-        namaBidang
-      }
-      jabatan{
-        id
-        namaJabatan
-      }
-      kdKantor{
-        id
-        namaKantor
-        kdKantor
-      }
-    }
-  }
-}
-             """ % (qs.pk, jabatan, bidang, kdKantor)
-
-                post_json = requests.post(url, json={'query':query})
-                json_data = json.loads(post_json.text)
-                if json_data['data']['updateUser'] is not None:
-                    data = json_data['data']['updateUser']['users']
-                    pesan = """
+                ExtendUser.objects.update_or_create(username=username, defaults={'bidang_id':bidang, 'jabatan_id':jabatan,'kd_kantor_id':kdKantor})
+                pesan = """
 Data user <b>{}</b> berhasil diupdate.
 
 Kantor : {} - {}
@@ -378,20 +411,54 @@ Kantor : {} - {}
 Jabatan : {}
 
 Bidang : {}
-                    """.format(data['username'], data['kdKantor']['kdKantor'], data['kdKantor']['namaKantor'],
-                        data['jabatan']['namaJabatan'],data['bidang']['namaBidang'])
-                    bot.send_message(idTelegram, pesan)
-           
-            elif int(qs.id_telegram) != message.chat.id:
-                bot.send_message(message.chat.id, "Username harus sesuai")
-            else:
-                pesan = """
-Anda tidak dapat melakukan
-<b>UPDATE</b> Akun lebih dari sekali!
-                """
+                """.format(qs.username, qs.kd_kantor.kd_kantor, qs.kd_kantor.nama_kantor, qs.jabatan.nama_jabatan, qs.bidang.nama_bidang)
                 bot.send_message(message.chat.id, pesan)
+            
         except:
             pass
+                # idTelegram = str(message.chat.id)
+#                 query = """
+# mutation{
+#   updateUser(id:%d, bidang:%d, jabatan:%d, kdKantor:%d){
+#     users{
+#       id
+#       username
+#       bidang{
+#         id
+#         namaBidang
+#       }
+#       jabatan{
+#         id
+#         namaJabatan
+#       }
+#       kdKantor{
+#         id
+#         namaKantor
+#         kdKantor
+#       }
+#     }
+#   }
+# }
+#              """ % (qs.pk, jabatan, bidang, kdKantor)
+
+#                 post_json = requests.post(url, json={'query':query})
+#                 json_data = json.loads(post_json.text)
+#                 if json_data['data']['updateUser'] is not None:
+#                     data = json_data['data']['updateUser']['users']
+#                     .format(data['username'], data['kdKantor']['kdKantor'], data['kdKantor']['namaKantor'],
+#                         data['jabatan']['namaJabatan'],data['bidang']['namaBidang'])
+#                     bot.send_message(idTelegram, pesan)
+           
+#             elif int(qs.id_telegram) != message.chat.id:
+#                 bot.send_message(message.chat.id, "Username harus sesuai")
+#             else:
+#                 pesan = """
+# Anda tidak dapat melakukan
+# <b>UPDATE</b> Akun lebih dari sekali!
+#                 """
+#                 bot.send_message(message.chat.id, pesan)
+#         except:
+#             pass
 
 @database_sync_to_async
 @bot.message_handler(commands=['infoAll'])
@@ -413,61 +480,36 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = """
-query{
-  infoPkbu(npp:"%s") {
-    kodePembina
-    namaPembina
-    npp
-    div1
-    namaPrsh
-    kepsAwal
-    kepsJp
-    blthNa
-    prog
-    totalTkAktif
-    totalIuranBerjalan
-    blthAkhir
-    sipp
-    tglUpload
-  }
-}            
-            """ % (npp)
-            get_json = (requests.get(url, json={'query':query}))
-            json_data = json.loads(get_json.text)
-            # print(json_data)
-            data = json_data['data']
-            data_pkbu = data['infoPkbu']
-            # print(data_pkbu[0])
-            if data_pkbu == []:
-                bot.send_message(message.chat.id,"NPP tidak ditemukan!")
-            else:
-                tgl = datetime.strptime(data_pkbu[0]['tglUpload'][:10], '%Y-%m-%d').strftime('%d-%m-%Y')
-                # print(tgl1)
-                div = data_pkbu[0]['div1']
-                user = data_pkbu[0]['kodePembina']
-                nama = data_pkbu[0]['namaPembina']
-                prsh = data_pkbu[0]['namaPrsh']
-                keps_awl = data_pkbu[0]['kepsAwal']
-                if data_pkbu[0]['kepsJp'] == '' or data_pkbu[0]['kepsJp'] is None:
-                    jp = '-'
-                else:
-                    jp = data_pkbu[0]['kepsJp']
-                if data_pkbu[0]['blthNa'] == '- ' or data_pkbu[0]['blthNa'] == '':
-                    na = 'Aktif'
-                else:
-                    na = data_pkbu[0]['blthNa']
-                prog = data_pkbu[0]['prog']
-                aktif = data_pkbu[0]['totalTkAktif']
-                locale.setlocale(locale.LC_MONETARY, 'id_ID')
-                iuran_jln = locale.currency(data_pkbu[0]['totalIuranBerjalan'], grouping=True)
-                rekon = data_pkbu[0]['blthAkhir']
-                if data_pkbu[0]['sipp'] == 1:
-                    sipp = 'YA'
-                else:
-                    sipp = 'TIDAK'
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            # print(query)
+            
+            if query is None:
                 pesan = """
-\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+Pastikan <b>NPP</> yang anda input adalah benar.
+
+
+<b>**</b><i>botsi sumbagut</i>
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                try:
+                    
+                    if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                        keps_jp = 'Tidak'
+                    else:
+                        keps_jp = query.keps_jp
+                    if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                        blthNa = 'Aktif'
+                    else:
+                        blthNa = 'NA sejak :' + query.blth_na
+                    if query.sipp == 1 or query.sipp == '1':
+                        sipp = 'YA'
+                    else:
+                        sipp = 'TIDAK'
+
+                    locale.setlocale(locale.LC_MONETARY, 'id_ID')
+                    iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                    pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -480,10 +522,13 @@ Total Iuran Berjalan : <b>{}</b>
 BLTH Rekon Terakhir : {}
 SIPP : {}
 
-<i>Sumber : MKRO</i>
-                """.format(npp, div,tgl, user, nama, prsh, keps_awl, jp, na, prog, aktif, iuran_jln, rekon, sipp)
-                bot.send_message(message.chat.id, pesan)
-            
+<i>Sumber : MKRO</i>          
+                    """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                        keps_jp,blthNa, query.prog,query.total_tk_aktif,iuran_berjalan,query.blth_akhir,sipp)
+                    bot.send_message(message.chat.id, pesan)
+                except:
+                    pesan = "NPP yang dimasukkan tidak benar"
+                    bot.send_message(message.chat.id, pesan)
 
 @database_sync_to_async
 @bot.message_handler(commands=['infoDetil'])
@@ -505,85 +550,39 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = """
-query {
-  infoDetilPkbu(npp:"%s"){
-    namaPrsh
-    div1
-    tglUpload
-    kodePembina
-    namaPembina
-    namaPrsh
-    kepsAwal
-    kepsJp
-    blthNa
-    pareto
-    sklUsaha
-    prog
-    tambahTk
-    kurangTk
-    totalTkAktif
-    totalTkNa
-    jmlAllTk
-    totalIuranBerjalan
-    blthAkhir
-    sipp
-    itw
-    ibrIjt
-    ibrIdm
-  }
-}
-            """ % (npp)
-            get_json = requests.get(url, json={'query':query})
-            json_data = json.loads(get_json.text)
-            data = json_data['data']
-            detil_pkbu = data['infoDetilPkbu']
-            if detil_pkbu == []:
-                bot.send_message(message.chat.id, "NPP tidak ditemukan!")
-            else:
-                tgl = datetime.strptime(detil_pkbu[0]['tglUpload'][:10], '%Y-%m-%d').strftime('%d-%m-%Y')
-                div = detil_pkbu[0]['div1']
-                user = detil_pkbu[0]['kodePembina']
-                nama = detil_pkbu[0]['namaPembina']
-                prsh = detil_pkbu[0]['namaPrsh']
-                keps_awal = detil_pkbu[0]['kepsAwal']
-                if detil_pkbu[0]['kepsJp'] == '' or detil_pkbu[0]['kepsJp'] is None:
-                    jp = '-'
-                else:
-                    jp = detil_pkbu[0]['kepsJp']
-                if detil_pkbu[0]['blthNa'] == '- ' or detil_pkbu[0]['blthNa'] == '':
-                    na = 'Aktif'
-                else:
-                    na = detil_pkbu[0]['blthNa']
-                pareto = detil_pkbu[0]['pareto']
-                skl = detil_pkbu[0]['sklUsaha']
-                prog = detil_pkbu[0]['prog']
-                tambah = detil_pkbu[0]['tambahTk']
-                kurang = detil_pkbu[0]['kurangTk']
-                aktif = detil_pkbu[0]['totalTkAktif']
-                tkNa = detil_pkbu[0]['totalTkNa']
-                total = detil_pkbu[0]['jmlAllTk']
-                locale.setlocale(locale.LC_MONETARY, 'id_ID')
-                iuran_jln = locale.currency(detil_pkbu[0]['totalIuranBerjalan'], grouping=True)
-                rekon = detil_pkbu[0]['blthAkhir']
-                if detil_pkbu[0]['sipp'] == 1:
-                    sipp = 'YA'
-                else:
-                    sipp = 'TIDAK'
-                if detil_pkbu[0]['itw'] == 1:
-                    itw = 'YA'
-                else:
-                    itw = 'TIDAK'
-                if detil_pkbu[0]['ibrIjt'] == 1:
-                    ijt = 'YA'
-                else:
-                    ijt = 'TIDAK'
-                if detil_pkbu[0]['ibrIdm'] == 1:
-                    idm = 'YA'
-                else:
-                    idm = 'TIDAK'
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            if query is None:
                 pesan = """
-\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
+Pastikan <b>NPP</> yang anda input adalah benar.
+
+
+
+<b>**</b><i>botsi sumbagut</i>
+                """
+                bot.send_message(message.chat.id, pesan)
+            else:
+                try:
+                    if query:
+                        if query.keps_jp == '' or query.keps_jp == '- ' or query.keps_jp is None:
+                            keps_jp = 'Tidak'
+                        else:
+                            keps_jp = query.keps_jp
+                        if query.blth_na == '' or query.blth_na == '- ' or query.blth_na is None:
+                            blthNa = 'Aktif'
+                        else:
+                            blthNa = 'NA sejak :' + query.blth_na
+                        if query.sipp == 1 or query.sipp == '1':
+                            sipp = 'YA'
+                        else:
+                            sipp = 'TIDAK'
+                        if query.itw == 1 or query.itw == '1':
+                            itw = 'YA'
+                        else:
+                            itw = 'TIDAK'
+
+                        locale.setlocale(locale.LC_MONETARY, 'id_ID')
+                        iuran_berjalan = locale.currency(query.total_iuran_berjalan, grouping=True)
+                        pesan = """\nBerikut adalah detil data NPP <b>{}</b> divisi {}, sesuai update terakhir pada <b>{}</b> :\n
 User Pembina : {}
 Nama Pembina : {}
 Nama Perusahaan : {}
@@ -608,11 +607,17 @@ IBR IDM        : {}
 
 
 
-<i>Sumber : MKRO</i>
-                """.format(npp, div, tgl, user, nama, prsh, keps_awal, jp, na, pareto, skl, prog,
-                    tambah, kurang, aktif, tkNa, total, iuran_jln, rekon, sipp, itw, ijt, idm)
-                bot.send_message(message.chat.id, pesan)
-                    
+<i>Sumber : MKRO</i>          
+                        """.format(query.npp,query.div_1,query.tgl_upload,query.kode_pembina,query.nama_pembina,query.nama_prsh,query.keps_awal,
+                            keps_jp,blthNa,query.pareto,query.skl_usaha, query.prog,query.tambah_tk,query.kurang_tk,query.total_tk_aktif,
+                                query.total_tk_na,query.jml_all_tk,iuran_berjalan,query.blth_akhir,
+                                sipp,itw,query.ibr_ijt,query.ibr_idm)
+                        bot.send_message(message.chat.id, pesan)
+                except AttributeError as ex:
+                    pesan = "NPP yang dimasukkan tidak benar. Error: {}".format(ex)
+                    bot.send_message(message.chat.id, pesan)
+
+
 @database_sync_to_async
 @bot.message_handler(commands=['profile'])
 def profile(message):
@@ -622,38 +627,10 @@ def profile(message):
         bot.send_message(message.chat.id,"Authorized user only")
     else:
         telegram = str(message.chat.id)
-        query = """
-query{
-  detilUserId(telegram:"%s") {
-    id
-    username
-    jabatan{
-      namaJabatan
-    }
-    bidang{
-      namaBidang
-    }
-    kdKantor{
-      kdKantor
-      namaKantor
-    }
-   
-  }
-}
-        """ % (telegram)
-        get_json = requests.get(url, json={'query':query})
-        json_data = json.loads(get_json.text)
-        # print(json_data)
-        # data = json_data['data']['detilUserId'][0]
-        data = json_data['data']
-        detil = data['detilUserId']
-        if detil == []:
-            bot.send_message(message.chat.id, "Akun tidak ditemukan")
+        qs = ExtendUser.objects.filter(id_telegram=message.chat.id)[0]
+        if qs.updated == False:
+            bot.send_message(message.chat.id,"Silahkan update data anda!")
         else:
-            user = detil[0]['username']
-            kantor = detil[0]['kdKantor']['kdKantor']+' - '+detil[0]['kdKantor']['namaKantor']
-            jabatan = detil[0]['jabatan']['namaJabatan']
-            bidang = detil[0]['bidang']['namaBidang']
             pesan = """
 Detil Profile <b><u>{}</u></b>:
 
@@ -666,8 +643,36 @@ Kantor  : {}
 </pre>
 
 <b>**</b><i>botsi sumbagut</i>
-            """.format(user, message.chat.first_name, jabatan, bidang, kantor)
+            """.format(qs.username, message.chat.first_name, qs.jabatan.nama_jabatan, qs.bidang.nama_bidang, qs.kd_kantor.kd_kantor)
             bot.send_message(message.chat.id, pesan)
+# query{
+#   detilUserId(telegram:"%s") {
+#     id
+#     username
+#     jabatan{
+#       namaJabatan
+#     }
+#     bidang{
+#       namaBidang
+#     }
+#     kdKantor{
+#       kdKantor
+#       namaKantor
+#     }
+   
+#   }
+# }
+#         """ % (telegram)
+#         get_json = requests.get(url, json={'query':query})
+#         json_data = json.loads(get_json.text)
+#         # print(json_data)
+#         data = json_data['data']['detilUserId'][0]
+#         user = data['username']
+#         kantor = data['kdKantor']['kdKantor']+' - '+data['kdKantor']['namaKantor']
+#         jabatan = data['jabatan']['namaJabatan']
+#         bidang = data['bidang']['namaBidang']
+        
+       
 
 @database_sync_to_async
 @bot.message_handler(commands=['REKAPBUREKON'])
@@ -927,3 +932,4 @@ Binaan {} :
 
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
+

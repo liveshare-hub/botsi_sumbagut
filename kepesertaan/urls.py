@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import index, verifikasi
+from .views import index
 
 urlpatterns = [
     path('cari', index),
-    path('activate/<str:token>', verifikasi),
+    # path('activate/<str:token>', verifikasi),
 ]

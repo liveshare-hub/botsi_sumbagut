@@ -43,10 +43,10 @@ INSTALLED_APPS = [
     'accounts',
     'detil_mkro',
     'kepesertaan',
-    'graphene_django',
-    'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
-    'graphql_auth',
-    'django_filters',
+    # 'graphene_django',
+    # 'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
+    # 'graphql_auth',
+    # 'django_filters',
     'channels',
 ]
 
@@ -91,25 +91,25 @@ DATABASES = {
     # },
     'default':{
         'ENGINE':'django.db.backends.mysql',
-        'NAME':config('DB_NAME'),
-        'USER':config('DB_USER2'),
-        'PASSWORD':config('DB_PASSWORD2'),
-        'HOST':config('DB_HOST'),
-        'PORT':config('DB_PORT'),
-    },
-    'primary':{
-        'ENGINE':'django.db.backends.mysql',
         'NAME':config('DB_NAME2'),
         'USER':config('DB_USER2'),
         'PASSWORD':config('DB_PASSWORD2'),
         'HOST':config('DB_HOST'),
         'PORT':config('DB_PORT'),
-    }
+    },
+    # 'primary':{
+    #     'ENGINE':'django.db.backends.mysql',
+    #     'NAME':config('DB_NAME2'),
+    #     'USER':config('DB_USER2'),
+    #     'PASSWORD':config('DB_PASSWORD2'),
+    #     'HOST':config('DB_HOST'),
+    #     'PORT':config('DB_PORT'),
+    # }
 }
 
-DATABASE_ROUTERS = (
-       'kepesertaan.dbrouters.KepesertaanDBRouter',
-    )
+# DATABASE_ROUTERS = (
+#        'kepesertaan.dbrouters.KepesertaanDBRouter',
+#     )
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -159,38 +159,38 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.ExtendUser'
 
-GRAPHENE = {
-    # 'SCHEMA':'detil_mkro.schema.schema',
-    'SCHEMA':'kepesertaan.schema.schema',
-    'MIDDLEWARE': [
-        'graphql_jwt.middleware.JSONWebTokenMiddleware'
-    ],
-}
+# GRAPHENE = {
+#     # 'SCHEMA':'detil_mkro.schema.schema',
+#     'SCHEMA':'kepesertaan.schema.schema',
+#     'MIDDLEWARE': [
+#         'graphql_jwt.middleware.JSONWebTokenMiddleware'
+#     ],
+# }
 
-AUTHENTICATION_BACKENDS = [
-    # 'graphql_jwt.backends.JSONWebTokenBackend',
-    'graphql_auth.backends.GraphQLAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
+# AUTHENTICATION_BACKENDS = [
+#     # 'graphql_jwt.backends.JSONWebTokenBackend',
+#     'graphql_auth.backends.GraphQLAuthBackend',
+#     'django.contrib.auth.backends.ModelBackend',
+# ]
 
-GRAPHQL_JWT = {
-    "JWT_ALLOW_ANY_CLASSES": [
-        'graphql_auth.mutations.Register',
-        'graphql_auth.mutations.VerifyAccount',
-        'graphql_auth.mutations.ObtainJSONWebToken',
-        'graphql_auth.mutations.VerifyToken',
-    ],
-    "JWT_VERIFY_EXPIRATION": True,
-    "JWT_LONG_RUNNING_REFRESH_TOKEN":True,
-}
+# GRAPHQL_JWT = {
+#     "JWT_ALLOW_ANY_CLASSES": [
+#         'graphql_auth.mutations.Register',
+#         'graphql_auth.mutations.VerifyAccount',
+#         'graphql_auth.mutations.ObtainJSONWebToken',
+#         'graphql_auth.mutations.VerifyToken',
+#     ],
+#     "JWT_VERIFY_EXPIRATION": True,
+#     "JWT_LONG_RUNNING_REFRESH_TOKEN":True,
+# }
 
-GRAPHQL_AUTH = {
-    'UPDATE_MUTATION_FIELDS': {
-        "jabatan":"Int",
-        "bidang":"Int",
-        "kd_kantor":"Int",
-    }
-}
+# GRAPHQL_AUTH = {
+#     'UPDATE_MUTATION_FIELDS': {
+#         "jabatan":"Int",
+#         "bidang":"Int",
+#         "kd_kantor":"Int",
+#     }
+# }
 
 BOT_API = config('API_BOT')
 

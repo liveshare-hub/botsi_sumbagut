@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import ExtendUser, m_bidang, m_jabatan, kode_kantor
-from django.apps import apps
+# from django.apps import apps
 # Register your models here.
 
 
@@ -9,7 +9,7 @@ admin.site.register(m_jabatan)
 admin.site.register(m_bidang)
 admin.site.register(kode_kantor)
 
-app = apps.get_app_config('graphql_auth')
+# app = apps.get_app_config('graphql_auth')
 
-for model_name, model in app.models.items():
-    admin.site.register(model)
+# for model_name, model in app.models.items():
+#     admin.site.register(model)
