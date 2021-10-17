@@ -5,7 +5,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ProcessPoolExecutor
 
-from detil_mkro.pushNotif import sendNotif
+from detil_mkro.pushNotif import sendNotif, kirim_pesan
+# from kepesertaan.telegramBot import kirim_pesan
 
 
 def mulai():
@@ -30,7 +31,9 @@ def mulai():
     scheduler = BackgroundScheduler()
 
     #days_of_week = 'mon-fri'
-    scheduler.add_job(sendNotif, 'cron', day_of_week='mon-fri', hour='7')
+    # scheduler.add_job(kirim_pesan, 'cron', day_of_week='mon-fri', hour='7')
+
+    scheduler.add_job(sendNotif, 'cron', minute='5-10')
 
     print(scheduler.print_jobs())
     

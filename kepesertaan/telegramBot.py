@@ -1,6 +1,6 @@
 # from threading import local
 from django.db.models.aggregates import Count, Sum
-from django.db.models import Q
+from django.db.models import Q, Max
 import telebot, locale
 import requests, json
 from datetime import datetime
@@ -13,6 +13,8 @@ from kepesertaan.fungsi import generateUniqueCode
 
 from telebot import apihelper
 
+from datetime import datetime, timedelta
+
 from .decorators import restricted
 
 import schedule
@@ -23,6 +25,7 @@ apihelper.SESSION_TIME_TO_LIVE = 5 * 60
 
 bot = telebot.TeleBot(settings.BOT_API, parse_mode='html')
 url = "http://localhost:8000/graphql"
+
 
 # qs = ExtendUser.objects.all()
 async def connect(self):
@@ -930,6 +933,39 @@ Binaan {} :
                 except:
                     bot.send_message(message.chat.id, "Otoritas tidak sesuai!")
 
+# def kirim_pesan():
+#     tgl1 = datetime.today()
+#     tgl2 = tgl1 - timedelta(days=1)
+#     td = tgl1.strftime('%Y-%m-%d')
+#     yt = tgl2.strftime('%Y-%m-%d')
+
+#     users = ExtendUser.objects.filter(jabatan_id=5)
+#     for user in users:
+#         datas = DetilMkro.objects.filter(kode_pembina=user.username, tgl_upload__range=(yt,td)).values('kode_pembina').annotate(jlh=Count('npp', distinct=True))
+#         if datas.exists():
+#             pesan = """
+# Dear user {}.
+
+# Jlh NPP Terkahir update adalah :
+# {} Perusahaan
+#             """.format(datas['kode_pembina'], datas['jlh'])
+#             kirim = bot.send_message(user.id_telegram, pesan)
+#             assert kirim.message_id
+        
+#         else:
+#             qs = DetilMkro.objects.filter(kode_pembina=user.username)
+#             tgl3 = qs.aggregate(Max('tgl_upload'))
+#             nw = tgl3['tgl_upload__max'].strftime('%Y-%m-%d')
+#             datas = qs.filter(tgl_upload__range=(nw, tgl3)).values('kode_pembina').annotate(lh=Count('npp', distinct=True))
+#             pesan = """
+# Dear user {}.
+
+# Jlh NPP Terkahir update adalah :
+# {} Perusahaan
+#             """.format(datas['kode_pembina'], datas['jlh'])
+#             kirim = bot.send_message(user.id_telegram, pesan)
+#             assert kirim.chat.id
+
 print('Bot is Running')
 bot.infinity_polling(timeout=10, long_polling_timeout=5)
-
+ 
