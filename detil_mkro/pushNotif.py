@@ -36,6 +36,21 @@ Dear User {}.
 Jumlah NPP Update Terakhir adalah :
 {}
             """.format(qs['kode_pembina'], qs['jlh'])
+            payload = {
+                "text":pesan,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": False,
+                "disable_notification": False,
+                "chat_id": str(user.id_telegram)
+            }
+            headers = {
+                "Accept": "application/json",
+                "User-Agent": "Telegram Bot SDK - (https://github.com/irazasyed/telegram-bot-sdk)",
+                "Content-Type": "application/json"
+            }
+
+            response = requests.request("POST", url, json=payload, headers=headers)
+            print(response.text)
         else:
             datas = qs.filter(kode_pembina=user.username)
             tgl3 = qs.aggregate(Max('tgl_upload'))
@@ -48,6 +63,21 @@ Jumlah NPP Terakhir adalah:
 
 <i>Tgl:{}</i>
             """.format(qs['kode_pembina'], qs['jlh'], nw)
+            payload = {
+                "text":pesan,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": False,
+                "disable_notification": False,
+                "chat_id": str(user.id_telegram)
+            }
+            headers = {
+                "Accept": "application/json",
+                "User-Agent": "Telegram Bot SDK - (https://github.com/irazasyed/telegram-bot-sdk)",
+                "Content-Type": "application/json"
+            }
+
+            response = requests.request("POST", url, json=payload, headers=headers)
+            print(response.text)
 #             for data in datas:
 #                 if data.keps_jp == '' or data.keps_jp == '- ' or data.keps_jp is None:
 #                     jp = 'Tidak'
@@ -81,21 +111,21 @@ Jumlah NPP Terakhir adalah:
 #                     jp, blthna, data.prog, data.total_tk_aktif, locale.currency(data.total_iuran_berjalan, grouping=True),
 #                         data.blth_akhir, sipp)
                 # print(url)
-        payload = {
-            "text":pesan,
-            "parse_mode": "HTML",
-            "disable_web_page_preview": False,
-            "disable_notification": False,
-            "chat_id": str(user.id_telegram)
-        }
-        headers = {
-            "Accept": "application/json",
-            "User-Agent": "Telegram Bot SDK - (https://github.com/irazasyed/telegram-bot-sdk)",
-            "Content-Type": "application/json"
-        }
+        # payload = {
+        #     "text":pesan,
+        #     "parse_mode": "HTML",
+        #     "disable_web_page_preview": False,
+        #     "disable_notification": False,
+        #     "chat_id": str(user.id_telegram)
+        # }
+        # headers = {
+        #     "Accept": "application/json",
+        #     "User-Agent": "Telegram Bot SDK - (https://github.com/irazasyed/telegram-bot-sdk)",
+        #     "Content-Type": "application/json"
+        # }
 
-        response = requests.request("POST", url, json=payload, headers=headers)
-        print(response.text)
+        # response = requests.request("POST", url, json=payload, headers=headers)
+        # print(response.text)
 
 
 def kirim_pesan():
