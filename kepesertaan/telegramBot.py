@@ -720,6 +720,9 @@ contoh : /REKAPBUREKON 2021
                     pass
             pesan = """
 Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon user <b>{}</b>
+Mohon lakukan tindaklanjut untuk PKBU yang Menunggak Iuran untuk
+Meningkatkan nilai ITW dan ITB
+Sumber: MKRO
             """.format(qs.username)
             bot.send_message(message.chat.id, pesan)
             tahun = int(texts[1])
@@ -782,6 +785,9 @@ contoh : /REKAPBU 2021
                     pass
             pesan = """
 Berikut adalah rekap PK/BU berdasarkan BLTH Terakhir Rekon Kantor Cabang <b>{}</b>
+Mohon lakukan tindaklanjut untuk PKBU yang Menunggak Iuran untuk
+Meningkatkan nilai ITW dan ITB
+Sumber: MKRO
             """.format(qs.kd_kantor)
             bot.send_message(message.chat.id, pesan)
             tahun = int(texts[1])
