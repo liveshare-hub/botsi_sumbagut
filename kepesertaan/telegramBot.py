@@ -162,7 +162,7 @@ def masuk(message):
 #         """ % (username, password)
 #         post_json = requests.post(url, json={'query':query})
 #         json_data = json.loads(post_json.text)
-#         data = json_data['data']['tokenAuth']
+#         data = json_data['data']['tokenAuth'] 
 #         if data['success'] == True:
             pesan = """
 Anda sudah berhasil Login!.
@@ -483,7 +483,7 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).order_by('-tgl_upload').first()
             # print(query)
             
             if query is None:
@@ -553,7 +553,7 @@ contoh : /infoAll AA020015
         """
             bot.send_message(message.chat.id, pesan)
         else:
-            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).first()
+            query = DetilMkro.objects.filter(kode_kantor=qs.kd_kantor.kd_kantor, npp=npp).order_by('-tgl_upload').first()
             if query is None:
                 pesan = """
 Pastikan <b>NPP</> yang anda input adalah benar.
