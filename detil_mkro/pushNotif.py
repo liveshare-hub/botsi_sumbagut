@@ -41,7 +41,7 @@ Jumlah NPP Update Terakhir adalah :
                 "parse_mode": "HTML",
                 "disable_web_page_preview": False,
                 "disable_notification": False,
-                "chat_id": str(user.id_telegram)
+                "chat_id": user.id_telegram
             }
             headers = {
                 "Accept": "application/json",
@@ -62,13 +62,13 @@ Jumlah NPP Terakhir adalah:
 {}
 
 <i>Tgl:{}</i>
-            """.format(qs['kode_pembina'], qs['jlh'], nw)
+            """.format(qs[0]['kode_pembina'], qs[0]['jlh'], nw)
             payload = {
                 "text":pesan,
                 "parse_mode": "HTML",
                 "disable_web_page_preview": False,
                 "disable_notification": False,
-                "chat_id": str(user.id_telegram)
+                "chat_id": user.id_telegram
             }
             headers = {
                 "Accept": "application/json",

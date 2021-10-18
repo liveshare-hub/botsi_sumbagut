@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'detil_mkro',
     'kepesertaan',
+    'django_apscheduler',
     # 'graphene_django',
     # 'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     # 'graphql_auth',
@@ -205,3 +206,9 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
 ASGI_APPLICATION = "core.asgi.application"
+
+
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
