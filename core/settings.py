@@ -91,7 +91,7 @@ DATABASES = {
         # 'NAME': BASE_DIR / 'db.sqlite3',
     # },
     'default':{
-        'ENGINE':'django.db.backends.mysql',
+        'ENGINE':'mysql_server_has_gone_away',
         'NAME':config('DB_NAME2'),
         'USER':config('DB_USER2'),
         'PASSWORD':config('DB_PASSWORD2'),
